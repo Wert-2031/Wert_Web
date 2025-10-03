@@ -8,15 +8,33 @@
     <link rel="stylesheet" type="text/css" href="Wert-Web.css"> 
 </head>
 <body>
+ <div id="navbar"></div>
+
+<script>
+  // Load navbar.html into #navbar
+  fetch("navbar.html")
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById("navbar").innerHTML = data;
+
+      // After loading, attach sounds
+      const hoverSound = new Audio("sounds/hover.mp3");
+      const clickSound = new Audio("sounds/click.mp3");
+
+      document.querySelectorAll(".navbar a").forEach(link => {
+        link.addEventListener("mouseenter", () => {
+          hoverSound.currentTime = 0;
+          hoverSound.play();
+        });
+        link.addEventListener("click", () => {
+          clickSound.currentTime = 0;
+          clickSound.play();
+        });
+      });
+    });
+</script>
     <h1>Welcome to the Wert-Web</h1>
     <p id="Intro-p">This is a website I made using <a href="#Sources">sources</a><a href="Wert-Web-T&C.html">(refrenced in the t&c agrement section2)</a>for all of you to enjoy my videos and content!:)</p>
-<table id="Browser_table">
-  <tr class="Browser">
-    <th class="Browser">Home</th>
-    <th><a class="Browser" href="Wert-Web-All.html">All</a></th>
-    <th><a class="Browser" href="Wert-Web-Gaming.html">Gaming</a></th>
-  </tr>
-</table>
 <tr>
   <th><iframe width="560" height="315" src="https://www.youtube.com/embed/NHbcGTuF4Jg?si=Udqc6hG1ffSLpNdh" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><h2 id="one">1st</h2></th>
   <th><iframe width="560" height="315" src="https://www.youtube.com/embed/m2M4YKF83Tc?si=hNxuDMq_Pg-1qMjg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><h2 id="two">2nd</h2></th>

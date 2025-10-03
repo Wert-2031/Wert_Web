@@ -8,9 +8,34 @@
     <link rel="stylesheet" type="text/css" href="Wert-Web.css"> 
 </head>
 <body>
+    <div id="navbar"></div>
+
+<script>
+  // Load navbar.html into #navbar
+  fetch("navbar.html")
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById("navbar").innerHTML = data;
+
+      // After loading, attach sounds
+      const hoverSound = new Audio("sounds/hover.mp3");
+      const clickSound = new Audio("sounds/click.mp3");
+
+      document.querySelectorAll(".navbar a").forEach(link => {
+        link.addEventListener("mouseenter", () => {
+          hoverSound.currentTime = 0;
+          hoverSound.play();
+        });
+        link.addEventListener("click", () => {
+          clickSound.currentTime = 0;
+          clickSound.play();
+        });
+      });
+    });
+</script>
 <section>
   <h1>Terms and Conditions</h1>
-  <p><strong>Effective Date:</strong> [Insert Date]</p>
+  <p><strong>Effective Date:</strong> October 3, 2025</p>
 
   <p>Welcome to <a href="Wert-Web.html"><strong>Wert-Web</strong></a>, the official website of 
     <a href="https://www.youtube.com/@Wert_2031" target="_blank" rel="noopener noreferrer">Wert_2031</a>. 

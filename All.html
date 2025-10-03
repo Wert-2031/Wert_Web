@@ -8,14 +8,32 @@
     <link rel="stylesheet" type="text/css" href="Wert-Web.css"> 
 </head>
 <body>
+    <div id="navbar"></div>
+
+<script>
+  // Load navbar.html into #navbar
+  fetch("navbar.html")
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById("navbar").innerHTML = data;
+
+      // After loading, attach sounds
+      const hoverSound = new Audio("sounds/hover.mp3");
+      const clickSound = new Audio("sounds/click.mp3");
+
+      document.querySelectorAll(".navbar a").forEach(link => {
+        link.addEventListener("mouseenter", () => {
+          hoverSound.currentTime = 0;
+          hoverSound.play();
+        });
+        link.addEventListener("click", () => {
+          clickSound.currentTime = 0;
+          clickSound.play();
+        });
+      });
+    });
+</script>
     <h1>Welcome to the Wert-Web</h1>
     <p id="Intro-p">This is a website I made using <a href="#Sources">sources</a> for all of you to enjoy my videos and content!:)</p>
-    <table id="Browser_table">
-  <tr class="Browser">
-    <th><a class="Browser" href="Wert-Web.html">Home</a></th>
-    <th class="Browser">All</th>
-    <th><a class="Browser" href="Wert-Web-Gaming.html">Gaming</a></th>
-  </tr>
-</table>
 </body>
 </html>

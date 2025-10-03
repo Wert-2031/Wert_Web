@@ -8,15 +8,33 @@
     <link rel="stylesheet" type="text/css" href="Wert-Web.css"> 
 </head>
 <body>
+    <div id="navbar"></div>
+
+<script>
+  // Load navbar.html into #navbar
+  fetch("navbar.html")
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById("navbar").innerHTML = data;
+
+      // After loading, attach sounds
+      const hoverSound = new Audio("sounds/hover.mp3");
+      const clickSound = new Audio("sounds/click.mp3");
+
+      document.querySelectorAll(".navbar a").forEach(link => {
+        link.addEventListener("mouseenter", () => {
+          hoverSound.currentTime = 0;
+          hoverSound.play();
+        });
+        link.addEventListener("click", () => {
+          clickSound.currentTime = 0;
+          clickSound.play();
+        });
+      });
+    });
+</script>
     <h1>Welcome to the Wert-Web</h1>
     <p id="Intro-p">Hi, this page is for all my videos on gaming. There are sub-sections for all of the different games I play!</p>
-    <table id="Browser_table">
-  <tr class="Browser">
-    <th><a class="Browser" href="Wert-Web.html">Home</a></th>
-    <th><a class="Browser" href="Wert-Web-All.html">All</a></th>
-    <th class="Browser">Gaming</th>
-  </tr>
-</table>
 <ol>
   <h2>Contents (Ordered by popularity)</h2>
   <li><a href="#Roblox">Roblox</a></li>
