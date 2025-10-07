@@ -1,120 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon" />
-    <title>Wert-Web</title>
-    <meta description="Wert-Web is an interactive HTML5 Website where i show my videos and things that i am doing.">
-    <link rel="stylesheet" type="text/css" href="Main-Style.css"> 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon" />
+
+  <!-- SEO -->
+  <title>Wert-Web | Terms & Conditions</title>
+  <meta name="description" content="Read the Terms & Conditions for Wert-Web, including content ownership, acceptable use, and third-party links.">
+  <meta name="keywords" content="wert-web, terms and conditions, T&C, HTML5 website, videos, web content">
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:title" content="Wert-Web | Terms & Conditions">
+  <meta property="og:description" content="Read the Terms & Conditions for Wert-Web, including content ownership, acceptable use, and third-party links.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourusername.github.io/your-repo/t-and-c.html">
+  <meta property="og:image" content="https://yourusername.github.io/your-repo/thumbnail.png">
+
+  <link rel="stylesheet" href="Main-Style.css">
 </head>
 <body>
+  <!-- Navbar Include -->
   <div id="navbar"></div>
 
-<script>
-fetch("navbar.html")
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById("navbar").innerHTML = data;
+  <script>
+    fetch("navbar.html")
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById("navbar").innerHTML = data;
 
-    // Load .wav sounds
-    const hoverSound = new Audio("hover.wav");
-    const clickSound = new Audio("click.wav");
+        // Load sounds
+        const hoverSound = new Audio("hover.wav");
+        const clickSound = new Audio("click.wav");
 
-    // Ensure hover sound plays only after first interaction
-    let interacted = false;
-    document.addEventListener("click", () => { interacted = true; }, { once: true });
+        let interacted = false;
+        document.addEventListener("click", () => { interacted = true; }, { once: true });
 
-    // Apply sounds and active page highlight
-    const links = document.querySelectorAll(".navbar a");
-    links.forEach(link => {
-      link.addEventListener("mouseenter", () => {
-        if (interacted) {
-          hoverSound.currentTime = 0;
-          hoverSound.play();
-        }
+        const links = document.querySelectorAll(".navbar a");
+        links.forEach(link => {
+          link.addEventListener("mouseenter", () => {
+            if (interacted) { hoverSound.currentTime = 0; hoverSound.play(); }
+          });
+          link.addEventListener("click", () => { clickSound.currentTime = 0; clickSound.play(); });
+
+          const currentPage = window.location.pathname.split("/").pop();
+          if (link.getAttribute("href") === currentPage) { link.classList.add("active"); }
+        });
       });
-      link.addEventListener("click", () => {
-        clickSound.currentTime = 0;
-        clickSound.play();
-      });
+  </script>
 
-      // Active page
-      const currentPage = window.location.pathname.split("/").pop();
-      if (link.getAttribute("href") === currentPage) {
-        link.classList.add("active");
-      }
-    });
-  });
-</script>
+  <!-- Main Content -->
+  <main>
+    <h1>Terms and Conditions</h1>
+    <p><strong>Effective Date:</strong> October 3, 2025</p>
 
-<section>
-  <h1>Terms and Conditions</h1>
-  <p><strong>Effective Date:</strong> October 3, 2025</p>
+    <p>Welcome to <a href="index.html"><strong>Wert-Web</strong></a>, the official website of 
+       <a href="https://www.youtube.com/@Wert_2031" target="_blank" rel="noopener noreferrer">Wert_2031</a>. 
+       By using this site, you agree to these Terms and Conditions. If you do not agree, please do not use this site.</p>
 
-  <p>Welcome to <a href="index.html"><strong>Wert-Web</strong></a>, the official website of 
-    <a href="https://www.youtube.com/@Wert_2031" target="_blank" rel="noopener noreferrer">Wert_2031</a>. 
-    These Terms and Conditions (“Terms”) govern your access to and use of this website (“Site”). 
-    By accessing or using the Site, you agree to be bound by these Terms. 
-    If you do not agree, please do not use this Site.
-  </p>
+    <h2>1. Content Ownership and Rights</h2>
+    <p>All content on this site—including videos, text, and graphics—is owned by 
+       <a href="https://www.youtube.com/@Wert_2031" target="_blank" rel="noopener noreferrer">Wert_2031</a>, unless otherwise stated.</p>
+    <p>Embedded YouTube videos are subject to 
+       <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer">YouTube’s Terms of Service</a>. 
+       This site does not claim ownership of YouTube’s content, only the original content provided by Wert_2031.</p>
 
-  <h2>1. Content Ownership and Rights</h2>
-  <p>
-    All content featured on this Site—including but not limited to videos, text, and graphics—is created and owned by 
-    <a href="https://www.youtube.com/@Wert_2031" target="_blank" rel="noopener noreferrer">Wert_2031</a>, unless otherwise indicated.
-  </p>
-  <p>
-    Videos displayed on this Site are <strong>embedded directly from YouTube</strong>, and are hosted and streamed in accordance with 
-    <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer">YouTube’s Terms of Service</a>. 
-    As such, YouTube retains the rights to distribute and make this content publicly viewable via embedding tools. 
-    This Site does <strong>not claim</strong> ownership over YouTube’s platform, but only over the original content provided by Wert_2031.
-  </p>
+    <h2>2. Third-Party Links</h2>
+    <p>This site may include links to external platforms:</p>
+    <ul>
+      <li><a href="https://www.quickstartguides.com/products/html-css-quickstart-guide?variant=43230006608125" target="_blank" rel="noopener noreferrer">HTML & CSS Quickstart Guide™</a></li>
+      <li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">Visual Studio Code™</a></li>
+      <li><a href="https://www.w3schools.com/" target="_blank" rel="noopener noreferrer">W3 Schools™</a></li>
+      <li><a href="https://www.google.com/chrome/" target="_blank" rel="noopener noreferrer">Google Chrome™</a></li>
+    </ul>
+    <p>Wert-Web is not responsible for third-party content or policies.</p>
 
-  <h2>2. Third-Party Links</h2>
-  <p>This Site may include external links to third-party platforms and resources, including:</p>
-  <ul>
-    <li><a href="https://www.quickstartguides.com/products/html-css-quickstart-guide?variant=43230006608125" target="_blank" rel="noopener noreferrer">HTML & CSS Quickstart Guide™</a></li>
-    <li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">Visual Studio Code™</a></li>
-    <li><a href="https://www.w3schools.com/" target="_blank" rel="noopener noreferrer">W3 Schools™</a></li>
-    <li><a href="https://www.google.com/chrome/" target="_blank" rel="noopener noreferrer">Google Chrome™</a></li>
-  </ul>
-  <p>
-    These links are provided for informational and educational purposes only. 
-    Wert-Web is not affiliated with, endorsed by, or responsible for the content or policies of any third-party websites.
-  </p>
+    <h2>3. Acceptable Use</h2>
+    <ul>
+      <li>Do not reproduce, redistribute, or modify content without permission.</li>
+      <li>Do not attempt unauthorized access to the site.</li>
+      <li>Do not use the site in violation of laws or regulations.</li>
+    </ul>
 
-  <h2>3. Acceptable Use</h2>
-  <p>By using this Site, you agree not to:</p>
-  <ul>
-    <li>Reproduce, redistribute, or modify any content without written permission;</li>
-    <li>Attempt to gain unauthorized access to the Site or its servers;</li>
-    <li>Use the Site in a manner that violates applicable laws or regulations.</li>
-  </ul>
+    <h2>4. No User Submissions</h2>
+    <p>This site does not accept user-generated content. All published material is maintained exclusively by the site owner.</p>
 
-  <h2>4. No User Submissions</h2>
-  <p>This Site does not accept user-generated content. All material published is curated and maintained exclusively by the Site owner.</p>
+    <h2>5. Limitation of Liability</h2>
+    <p>Content is provided “as is” without warranties. Wert-Web does not guarantee uninterrupted access or accuracy. Use at your own risk.</p>
 
-  <h2>5. Limitation of Liability</h2>
-  <p>
-    All content on this Site is provided “as is” without warranties of any kind. 
-    Wert-Web does not guarantee uninterrupted access or accuracy of content. 
-    Your use of the Site is at your sole risk.
-  </p>
+    <h2>6. Modifications</h2>
+    <p>We may update these Terms at any time. Continued use indicates acceptance of updates.</p>
 
-  <h2>6. Modifications</h2>
-  <p>
-    We reserve the right to modify or update these Terms at any time. 
-    Updates will be posted to this page and become effective upon publication. 
-    Continued use of the Site indicates your acceptance of the updated Terms.
-  </p>
-
-  <h2>7. Contact</h2>
-  <p>
-    If you have any questions or concerns regarding these Terms and Conditions, please contact: <br>
-  
-    <strong>YouTube Channel:</strong> 
-        <a href="https://www.youtube.com/@Wert_2031" target="_blank" rel="noopener noreferrer">https://www.youtube.com/@Wert_2031</a>
-  </p>
-</section>
+    <h2>7. Contact</h2>
+    <p>Questions or concerns? Contact via YouTube: 
+       <a href="https://www.youtube.com/@Wert_2031" target="_blank" rel="noopener noreferrer">https://www.youtube.com/@Wert_2031</a>
+    </p>
+  </main>
 </body>
 </html>
+
