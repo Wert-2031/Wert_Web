@@ -2,101 +2,161 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon" />
+  <title>All Videos | Wert-Web</title>
 
-  <!-- SEO -->
-  <title>Wert-Web | Gaming Videos</title>
-  <meta name="description" content="Browse all gaming videos by Wert_2031, including Roblox, Minecraft, and other games.">
-  <meta name="keywords" content="wert-web, gaming, videos, Roblox, Minecraft, Wert_2031, HTML5 website">
-
-  <!-- Open Graph / Social Sharing -->
-  <meta property="og:title" content="Wert-Web | Gaming Videos">
-  <meta property="og:description" content="Browse all gaming videos by Wert_2031, including Roblox, Minecraft, and other games.">
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Explore all Wert-Web videos in one place! Featuring gaming content, Roblox adventures, Minecraft builds, and much more.">
+  <meta name="keywords" content="Wert-Web, gaming videos, Roblox, Minecraft, Wert Web videos, YouTube, interactive HTML5 site">
+  <meta name="author" content="Wert-Web Creator">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:title" content="Wert-Web | All Gaming Videos">
+  <meta property="og:description" content="Watch all Wert-Web gaming videos, from Roblox to Minecraft and more.">
+  <meta property="og:image" content="Wert_2031.ico">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://yourusername.github.io/your-repo/gaming.html">
-  <meta property="og:image" content="https://yourusername.github.io/your-repo/thumbnail.png">
 
-  <link rel="stylesheet" href="Main-Style.css">
+  <link rel="stylesheet" type="text/css" href="Main-Style.css"> 
 </head>
+
 <body>
-  <!-- Navbar Include -->
   <div id="navbar"></div>
 
   <script>
-    fetch("navbar.html")
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById("navbar").innerHTML = data;
+  // Load navbar and attach sounds
+  fetch("navbar.html")
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById("navbar").innerHTML = data;
 
-        // Load sounds
-        const hoverSound = new Audio("hover.wav");
-        const clickSound = new Audio("click.wav");
+      const hoverSound = new Audio("sounds/hover.wav");
+      const clickSound = new Audio("sounds/click.wav");
+      let interacted = false;
+      document.addEventListener("click", () => { interacted = true; }, { once: true });
 
-        let interacted = false;
-        document.addEventListener("click", () => { interacted = true; }, { once: true });
-
-        const links = document.querySelectorAll(".navbar a");
-        links.forEach(link => {
-          link.addEventListener("mouseenter", () => {
-            if (interacted) { hoverSound.currentTime = 0; hoverSound.play(); }
-          });
-          link.addEventListener("click", () => { clickSound.currentTime = 0; clickSound.play(); });
-
-          const currentPage = window.location.pathname.split("/").pop();
-          if (link.getAttribute("href") === currentPage) { link.classList.add("active"); }
+      const links = document.querySelectorAll(".navbar a");
+      links.forEach(link => {
+        link.addEventListener("mouseenter", () => {
+          if (interacted) {
+            hoverSound.currentTime = 0;
+            hoverSound.play();
+          }
         });
+        link.addEventListener("click", () => {
+          clickSound.currentTime = 0;
+          clickSound.play();
+        });
+
+        // Highlight active page
+        const currentPage = window.location.pathname.split("/").pop();
+        if (link.getAttribute("href") === currentPage) {
+          link.classList.add("active");
+        }
       });
+    });
   </script>
 
-  <!-- Main Content -->
   <main>
-    <h1>Gaming Videos</h1>
-    <p>Welcome to the Gaming section of Wert-Web! Browse my videos from Roblox, Minecraft, and other games.</p>
+    <h1>All Wert-Web Videos</h1>
+    <p id="Intro-p">Welcome! This page contains every gaming video I’ve made — sorted by category and popularity. Use the button below to load more videos gradually to save data and bandwidth.</p>
 
-    <!-- Table of Contents -->
-    <section id="contents">
-      <h2>Contents (Ordered by Popularity)</h2>
-      <ol>
-        <li><a href="#Roblox">Roblox</a></li>
-        <li><a href="#Minecraft">Minecraft</a></li>
-        <li><a href="#OtherGames">Other Games</a></li>
-      </ol>
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#Roblox">Roblox</a></li>
+      <li><a href="#Minecraft">Minecraft</a></li>
+    </ol>
+
+    <section id="Roblox">
+      <h3>Roblox</h3>
+      <div id="roblox-videos" class="video-grid"></div>
+      <button id="load-roblox" class="load-btn">Load More Roblox Videos</button>
     </section>
 
-    <!-- Roblox Videos -->
-    <section id="Roblox" class="video-grid">
-      <h2>Roblox</h2>
-      <div class="video-item">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/NHbcGTuF4Jg?si=1kIwwGMmJCpyqeym" 
-                title="Roblox Video 1" frameborder="0" allowfullscreen></iframe>
-      </div>
-      <div class="video-item">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/nzfTHaP0-DU?si=K3CeyReWtcahsyLo" 
-                title="Roblox Video 2" frameborder="0" allowfullscreen></iframe>
-      </div>
-      <!-- Add additional Roblox videos here following the same <div class="video-item"> format -->
-    </section>
-
-    <!-- Minecraft Videos -->
-    <section id="Minecraft" class="video-grid">
-      <h2>Minecraft</h2>
-      <div class="video-item">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/7nf6lq8To9M?si=p7x04-FGN9XQA8k0" 
-                title="Minecraft Video 1" frameborder="0" allowfullscreen></iframe>
-      </div>
-      <div class="video-item">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/Prg2djGirdY?si=HoYLKuzd3n5i_4Jq" 
-                title="Minecraft Video 2" frameborder="0" allowfullscreen></iframe>
-      </div>
-      <!-- Add additional Minecraft videos here following the same format -->
-    </section>
-
-    <!-- Other Games -->
-    <section id="OtherGames" class="video-grid">
-      <h2>Other Games</h2>
-      <p>More gaming videos from other titles will be listed here as I upload them!</p>
+    <section id="Minecraft">
+      <h3>Minecraft</h3>
+      <div id="minecraft-videos" class="video-grid"></div>
+      <button id="load-minecraft" class="load-btn">Load More Minecraft Videos</button>
     </section>
   </main>
+
+  <script>
+  // Store video data
+  const robloxVideos = [
+    "NHbcGTuF4Jg","nzfTHaP0-DU","mZGiCQhGjLM","r9-0rNk_eOY","Xk58dNgJ6WA","ThUoTBurmrE",
+    "KMBUehrr8RU","FQAvD97cNW8","g5JIxrbTHcc"
+  ];
+  const minecraftVideos = [
+    "7nf6lq8To9M","Prg2djGirdY","dhZWpbAdv3Q","5pd-wrcdEYQ","2YRuxAhGGKk","TS8GVVPGC6g",
+    "FettRYf9DrI","DxWrMr2LK2g","cobts_27tug","VHIg8SaYG64","TwMfWzvEP9o","PBUC0Avcdzs",
+    "5tlzMdaS-tc","TO8fjt4qqz4","kAcyCKbnpQ4","QskuaglpoLA"
+  ];
+
+  function createVideoIframe(id) {
+    const iframe = document.createElement("iframe");
+    iframe.width = "560";
+    iframe.height = "315";
+    iframe.src = `https://www.youtube.com/embed/${id}`;
+    iframe.title = "YouTube video player";
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    iframe.referrerPolicy = "strict-origin-when-cross-origin";
+    iframe.allowFullscreen = true;
+    return iframe;
+  }
+
+  function loadVideos(category, containerId, list, count) {
+    const container = document.getElementById(containerId);
+    const currentCount = container.children.length;
+    const nextVideos = list.slice(currentCount, currentCount + count);
+    nextVideos.forEach(id => {
+      const div = document.createElement("div");
+      div.classList.add("video-container");
+      div.appendChild(createVideoIframe(id));
+      container.appendChild(div);
+    });
+    if (container.children.length >= list.length) {
+      document.getElementById("load-" + category).style.display = "none";
+    }
+  }
+
+  document.getElementById("load-roblox").addEventListener("click", () => {
+    loadVideos("roblox", "roblox-videos", robloxVideos, 3);
+  });
+
+  document.getElementById("load-minecraft").addEventListener("click", () => {
+    loadVideos("minecraft", "minecraft-videos", minecraftVideos, 4);
+  });
+
+  // Initial few videos
+  loadVideos("roblox", "roblox-videos", robloxVideos, 3);
+  loadVideos("minecraft", "minecraft-videos", minecraftVideos, 4);
+  </script>
+
+  <style>
+    .video-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+    .video-container {
+      flex: 1 1 560px;
+      display: flex;
+      justify-content: center;
+    }
+    .load-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #0078ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .load-btn:hover {
+      background: #005fcc;
+    }
+  </style>
 </body>
 </html>
