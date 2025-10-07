@@ -1,53 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon" />
-    <title>Wert-Web</title>
-    <meta description="Wert-Web is an interactive HTML5 Website where i show my videos and things that i am doing.">
-    <link rel="stylesheet" type="text/css" href="Main-Style.css"> 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon" />
+
+  <!-- SEO -->
+  <title>Wert-Web | All Content</title>
+  <meta name="description" content="Browse all content on Wert-Web, including videos, projects, and other creations from Wert_2031.">
+  <meta name="keywords" content="wert-web, videos, projects, gaming, all content, HTML5 website">
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:title" content="Wert-Web | All Content">
+  <meta property="og:description" content="Browse all content on Wert-Web, including videos, projects, and creations from Wert_2031.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourusername.github.io/your-repo/all.html">
+  <meta property="og:image" content="https://yourusername.github.io/your-repo/thumbnail.png">
+
+  <link rel="stylesheet" href="Main-Style.css">
 </head>
 <body>
- <div id="navbar"></div>
+  <!-- Navbar Include -->
+  <div id="navbar"></div>
 
-<script>
-fetch("navbar.html")
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById("navbar").innerHTML = data;
+  <script>
+    fetch("navbar.html")
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById("navbar").innerHTML = data;
 
-    // Load .wav sounds
-    const hoverSound = new Audio("hover.wav");
-    const clickSound = new Audio("click.wav");
+        // Load sounds
+        const hoverSound = new Audio("hover.wav");
+        const clickSound = new Audio("click.wav");
 
-    // Ensure hover sound plays only after first interaction
-    let interacted = false;
-    document.addEventListener("click", () => { interacted = true; }, { once: true });
+        let interacted = false;
+        document.addEventListener("click", () => { interacted = true; }, { once: true });
 
-    // Apply sounds and active page highlight
-    const links = document.querySelectorAll(".navbar a");
-    links.forEach(link => {
-      link.addEventListener("mouseenter", () => {
-        if (interacted) {
-          hoverSound.currentTime = 0;
-          hoverSound.play();
-        }
+        const links = document.querySelectorAll(".navbar a");
+        links.forEach(link => {
+          link.addEventListener("mouseenter", () => {
+            if (interacted) { hoverSound.currentTime = 0; hoverSound.play(); }
+          });
+          link.addEventListener("click", () => { clickSound.currentTime = 0; clickSound.play(); });
+
+          const currentPage = window.location.pathname.split("/").pop();
+          if (link.getAttribute("href") === currentPage) { link.classList.add("active"); }
+        });
       });
-      link.addEventListener("click", () => {
-        clickSound.currentTime = 0;
-        clickSound.play();
-      });
+  </script>
 
-      // Active page
-      const currentPage = window.location.pathname.split("/").pop();
-      if (link.getAttribute("href") === currentPage) {
-        link.classList.add("active");
-      }
-    });
-  });
-</script>
+  <!-- Main Content -->
+  <main>
+    <h1>All Content on Wert-Web</h1>
+    <p>Welcome to the All Content page of Wert-Web! Here you can browse all videos, projects, and creations from <strong>Wert_2031</strong>.</p>
 
-    <h1>Welcome to the Wert-Web</h1>
-    <p id="Intro-p">This is a website I made using <a href="#Sources">sources</a> for all of you to enjoy my videos and content!:)</p>
+    <!-- Video Section -->
+    <section id="videos" class="video-grid">
+      <div class="video-item">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/NHbcGTuF4Jg?si=Udqc6hG1ffSLpNdh" 
+                title="Video 1" frameborder="0" allowfullscreen></iframe>
+        <h2>Video 1</h2>
+      </div>
+      <div class="video-item">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/m2M4YKF83Tc?si=hNxuDMq_Pg-1qMjg" 
+                title="Video 2" frameborder="0" allowfullscreen></iframe>
+        <h2>Video 2</h2>
+      </div>
+      <div class="video-item">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/mZGiCQhGjLM?si=dKVsRKTvaHfhW-X6" 
+                title="Video 3" frameborder="0" allowfullscreen></iframe>
+        <h2>Video 3</h2>
+      </div>
+    </section>
+
+    <!-- Projects / Other Content Section -->
+    <section id="projects">
+      <h2>Projects & Creations</h2>
+      <ul>
+        <li><strong>HTML5 Web Projects:</strong> Interactive web pages and mini-games.</li>
+        <li><strong>Gaming Content:</strong> Videos, tips, and tutorials from Wert_2031.</li>
+        <li><strong>Tools & Resources:</strong> Guides and references used in development.</li>
+      </ul>
+    </section>
+
+    <!-- Sources -->
+    <section id="Sources">
+      <h2>Sources & References</h2>
+      <ol>
+        <li><a href="https://www.quickstartguides.com/products/html-css-quickstart-guide?variant=43230006608125" target="_blank" rel="noopener noreferrer">HTML & CSS Quickstart Guide™</a></li>
+        <li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">Visual Studio Code™</a></li>
+        <li><a href="https://www.w3schools.com/" target="_blank" rel="noopener noreferrer">W3 Schools™</a></li>
+        <li><a href="https://www.google.com/chrome/" target="_blank" rel="noopener noreferrer">Google Chrome™</a></li>
+      </ol>
+    </section>
+  </main>
 </body>
 </html>
