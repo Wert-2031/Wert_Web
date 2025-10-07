@@ -80,3 +80,20 @@ nav {
   color: white;
 }
 
+.video-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.video-item {
+  flex: 1 1 560px;
+  max-width: 560px;
+  text-align: center;
+}
+
+.video-item h2 {
+  margin-top: 5px;
+}
+

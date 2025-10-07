@@ -1,66 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon" />
-    <title>Wert-Web</title>
-    <meta description="Wert-Web is an interactive HTML5 Website where i show my videos and things that i am doing.">
-    <link rel="stylesheet" type="text/css" href="Main-Style.css"> 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon" />
+
+  <!-- SEO -->
+  <title>Wert-Web | Home</title>
+  <meta name="description" content="Wert-Web is an interactive HTML5 website where I share videos and projects for everyone to enjoy.">
+  <meta name="keywords" content="wert-web, HTML5, videos, gaming, projects, web content">
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:title" content="Wert-Web | Home">
+  <meta property="og:description" content="Wert-Web is an interactive HTML5 website where I share videos and projects.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourusername.github.io/your-repo/">
+  <meta property="og:image" content="https://yourusername.github.io/your-repo/thumbnail.png">
+
+  <link rel="stylesheet" href="Main-Style.css">
 </head>
 <body>
- <div id="navbar"></div>
+  <!-- Navbar Include -->
+  <div id="navbar"></div>
 
-<script>
-fetch("navbar.html")
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById("navbar").innerHTML = data;
+  <script>
+    fetch("navbar.html")
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById("navbar").innerHTML = data;
 
-    // Load .wav sounds
-    const hoverSound = new Audio("hover.wav");
-    const clickSound = new Audio("click.wav");
+        // Load sounds
+        const hoverSound = new Audio("hover.wav");
+        const clickSound = new Audio("click.wav");
 
-    // Ensure hover sound plays only after first interaction
-    let interacted = false;
-    document.addEventListener("click", () => { interacted = true; }, { once: true });
+        let interacted = false;
+        document.addEventListener("click", () => { interacted = true; }, { once: true });
 
-    // Apply sounds and active page highlight
-    const links = document.querySelectorAll(".navbar a");
-    links.forEach(link => {
-      link.addEventListener("mouseenter", () => {
-        if (interacted) {
-          hoverSound.currentTime = 0;
-          hoverSound.play();
-        }
+        const links = document.querySelectorAll(".navbar a");
+        links.forEach(link => {
+          link.addEventListener("mouseenter", () => {
+            if (interacted) { hoverSound.currentTime = 0; hoverSound.play(); }
+          });
+          link.addEventListener("click", () => { clickSound.currentTime = 0; clickSound.play(); });
+
+          // Highlight active page
+          const currentPage = window.location.pathname.split("/").pop();
+          if (link.getAttribute("href") === currentPage) { link.classList.add("active"); }
+        });
       });
-      link.addEventListener("click", () => {
-        clickSound.currentTime = 0;
-        clickSound.play();
-      });
+  </script>
 
-      // Active page
-      const currentPage = window.location.pathname.split("/").pop();
-      if (link.getAttribute("href") === currentPage) {
-        link.classList.add("active");
-      }
-    });
-  });
-</script>
-    
-    <h1>Welcome to the Wert-Web</h1>
-    <p id="Intro-p">This is a website I made using <a href="#Sources">sources</a><a href="T&C.html">(refrenced in the t&c agrement section2)</a>for all of you to enjoy my videos and content!:)</p>
-<tr>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/NHbcGTuF4Jg?si=Udqc6hG1ffSLpNdh" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><h2 id="one">1st</h2></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/m2M4YKF83Tc?si=hNxuDMq_Pg-1qMjg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><h2 id="two">2nd</h2></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/mZGiCQhGjLM?si=dKVsRKTvaHfhW-X6" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><h2 id="three">3rd</h2></th>
-</tr>
-<h2 id="Sources">Sources</h2>
-<ol>
-  <li>HTML & CSS Quickstart Guide&trade;. <a href="https://www.quickstartguides.com/products/html-css-quickstart-guide?variant=43230006608125">Click Here To See</a></li>
-  <li>Visual Studio Code&trade;. <a href="https://code.visualstudio.com/">Click Here To See</a></li>
-  <li>W3 Schools&trade;. <a href="https://www.w3schools.com/">Click Here To See</a></li>
-  <li>Google Chrome&trade;<a href="https://www.google.com/chrome/">Click Here To See</a></li>
-</ol>
-<strong><a href="T&C.html">T&C</a></strong>
+  <!-- Main Content -->
+  <main>
+    <h1>Welcome to Wert-Web</h1>
+    <p id="Intro-p">
+      This is a website I made using <a href="#Sources">sources</a>
+      <a href="T&C.html">(referenced in the T&C agreement section)</a> 
+      for everyone to enjoy my videos and content! :)
+    </p>
+
+    <!-- Video Section -->
+    <section id="videos" class="video-grid">
+      <div class="video-item">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/NHbcGTuF4Jg?si=Udqc6hG1ffSLpNdh" 
+                title="Wert-Web Video 1" frameborder="0" allowfullscreen></iframe>
+        <h2>1st Video</h2>
+      </div>
+      <div class="video-item">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/m2M4YKF83Tc?si=hNxuDMq_Pg-1qMjg" 
+                title="Wert-Web Video 2" frameborder="0" allowfullscreen></iframe>
+        <h2>2nd Video</h2>
+      </div>
+      <div class="video-item">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/mZGiCQhGjLM?si=dKVsRKTvaHfhW-X6" 
+                title="Wert-Web Video 3" frameborder="0" allowfullscreen></iframe>
+        <h2>3rd Video</h2>
+      </div>
+    </section>
+
+    <!-- Sources -->
+    <section id="Sources">
+      <h2>Sources</h2>
+      <ol>
+        <li>HTML & CSS Quickstart Guide™: <a href="https://www.quickstartguides.com/products/html-css-quickstart-guide?variant=43230006608125">Click Here</a></li>
+        <li>Visual Studio Code™: <a href="https://code.visualstudio.com/">Click Here</a></li>
+        <li>W3 Schools™: <a href="https://www.w3schools.com/">Click Here</a></li>
+        <li>Google Chrome™: <a href="https://www.google.com/chrome/">Click Here</a></li>
+      </ol>
+      <p><strong><a href="T&C.html">Terms & Conditions</a></strong></p>
+    </section>
+  </main>
 </body>
 </html>
