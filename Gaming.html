@@ -1,94 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon" />
-    <title>Wert-Web</title>
-    <meta description="Wert-Web is an interactive HTML5 Website where i show my videos and things that i am doing.">
-    <link rel="stylesheet" type="text/css" href="Main-Style.css"> 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon" />
+
+  <!-- SEO -->
+  <title>Wert-Web | Gaming Videos</title>
+  <meta name="description" content="Browse all gaming videos by Wert_2031, including Roblox, Minecraft, and other games.">
+  <meta name="keywords" content="wert-web, gaming, videos, Roblox, Minecraft, Wert_2031, HTML5 website">
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:title" content="Wert-Web | Gaming Videos">
+  <meta property="og:description" content="Browse all gaming videos by Wert_2031, including Roblox, Minecraft, and other games.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourusername.github.io/your-repo/gaming.html">
+  <meta property="og:image" content="https://yourusername.github.io/your-repo/thumbnail.png">
+
+  <link rel="stylesheet" href="Main-Style.css">
 </head>
 <body>
-    <div id="navbar"></div>
+  <!-- Navbar Include -->
+  <div id="navbar"></div>
 
-<script>
-fetch("navbar.html")
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById("navbar").innerHTML = data;
+  <script>
+    fetch("navbar.html")
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById("navbar").innerHTML = data;
 
-    // Load .wav sounds
-    const hoverSound = new Audio("hover.wav");
-    const clickSound = new Audio("click.wav");
+        // Load sounds
+        const hoverSound = new Audio("hover.wav");
+        const clickSound = new Audio("click.wav");
 
-    // Ensure hover sound plays only after first interaction
-    let interacted = false;
-    document.addEventListener("click", () => { interacted = true; }, { once: true });
+        let interacted = false;
+        document.addEventListener("click", () => { interacted = true; }, { once: true });
 
-    // Apply sounds and active page highlight
-    const links = document.querySelectorAll(".navbar a");
-    links.forEach(link => {
-      link.addEventListener("mouseenter", () => {
-        if (interacted) {
-          hoverSound.currentTime = 0;
-          hoverSound.play();
-        }
+        const links = document.querySelectorAll(".navbar a");
+        links.forEach(link => {
+          link.addEventListener("mouseenter", () => {
+            if (interacted) { hoverSound.currentTime = 0; hoverSound.play(); }
+          });
+          link.addEventListener("click", () => { clickSound.currentTime = 0; clickSound.play(); });
+
+          const currentPage = window.location.pathname.split("/").pop();
+          if (link.getAttribute("href") === currentPage) { link.classList.add("active"); }
+        });
       });
-      link.addEventListener("click", () => {
-        clickSound.currentTime = 0;
-        clickSound.play();
-      });
+  </script>
 
-      // Active page
-      const currentPage = window.location.pathname.split("/").pop();
-      if (link.getAttribute("href") === currentPage) {
-        link.classList.add("active");
-      }
-    });
-  });
-</script>
+  <!-- Main Content -->
+  <main>
+    <h1>Gaming Videos</h1>
+    <p>Welcome to the Gaming section of Wert-Web! Browse my videos from Roblox, Minecraft, and other games.</p>
 
-    <h1>Welcome to the Wert-Web</h1>
-    <p id="Intro-p">Hi, this page is for all my videos on gaming. There are sub-sections for all of the different games I play!</p>
-<ol>
-  <h2>Contents (Ordered by popularity)</h2>
-  <li><a href="#Roblox">Roblox</a></li>
-  <li><a href="#Minecraft">Minecraft</a></li>
-  <li><a>Others</a></li>
-</ol>
+    <!-- Table of Contents -->
+    <section id="contents">
+      <h2>Contents (Ordered by Popularity)</h2>
+      <ol>
+        <li><a href="#Roblox">Roblox</a></li>
+        <li><a href="#Minecraft">Minecraft</a></li>
+        <li><a href="#OtherGames">Other Games</a></li>
+      </ol>
+    </section>
 
+    <!-- Roblox Videos -->
+    <section id="Roblox" class="video-grid">
+      <h2>Roblox</h2>
+      <div class="video-item">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/NHbcGTuF4Jg?si=1kIwwGMmJCpyqeym" 
+                title="Roblox Video 1" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <div class="video-item">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/nzfTHaP0-DU?si=K3CeyReWtcahsyLo" 
+                title="Roblox Video 2" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <!-- Add additional Roblox videos here following the same <div class="video-item"> format -->
+    </section>
 
-<h3 id="Roblox">Roblox</h3>
-<tr>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/NHbcGTuF4Jg?si=1kIwwGMmJCpyqeym" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/nzfTHaP0-DU?si=K3CeyReWtcahsyLo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/mZGiCQhGjLM?si=dgzW_teC2RBcKaNc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/r9-0rNk_eOY?si=yuFBTIEULHVAu6Jv" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/Xk58dNgJ6WA?si=funlDHN1Az8E8apf" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/ThUoTBurmrE?si=p0TIQih2fPADdATx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/KMBUehrr8RU?si=Nkj1LXUWyX3BN134" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/FQAvD97cNW8?si=UlDxzZAKaRNrfvzZ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/g5JIxrbTHcc?si=IpWEa2tbFrjImYpx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-</tr>
+    <!-- Minecraft Videos -->
+    <section id="Minecraft" class="video-grid">
+      <h2>Minecraft</h2>
+      <div class="video-item">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/7nf6lq8To9M?si=p7x04-FGN9XQA8k0" 
+                title="Minecraft Video 1" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <div class="video-item">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/Prg2djGirdY?si=HoYLKuzd3n5i_4Jq" 
+                title="Minecraft Video 2" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <!-- Add additional Minecraft videos here following the same format -->
+    </section>
 
-<h3 id="Minecraft">Minecraft</h3>
-<tr>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/7nf6lq8To9M?si=p7x04-FGN9XQA8k0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/Prg2djGirdY?si=HoYLKuzd3n5i_4Jq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/dhZWpbAdv3Q?si=blGp47w0niKAuN4x" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/5pd-wrcdEYQ?si=I06HZXcfFlAQwg_j" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/2YRuxAhGGKk?si=sutzcb8KcGH1Jxw5" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/TS8GVVPGC6g?si=WqsuAz3BQ14C2hcb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/FettRYf9DrI?si=v8yl9ruWFWM5RWDp" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/DxWrMr2LK2g?si=qj3tkA8AmeCD-7nE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/cobts_27tug?si=qfiqCw3gu8NB7SQQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/VHIg8SaYG64?si=GtokNCapnJ8HQUIM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/7nf6lq8To9M?si=RTg-VX0peLGxCFGD" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/TwMfWzvEP9o?si=-QTdIF9qJHNTnzJQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/PBUC0Avcdzs?si=mxcXyDu-IaagbaPn" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/5tlzMdaS-tc?si=1BD_4ECzj4_8iAfF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/TO8fjt4qqz4?si=MWggl1GociY7H41G" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/kAcyCKbnpQ4?si=GQHafglnjNqGDKVS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-  <th><iframe width="560" height="315" src="https://www.youtube.com/embed/QskuaglpoLA?si=EnE1zNlq36otgbHt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></th>
-</tr>
+    <!-- Other Games -->
+    <section id="OtherGames" class="video-grid">
+      <h2>Other Games</h2>
+      <p>More gaming videos from other titles will be listed here as I upload them!</p>
+    </section>
+  </main>
 </body>
 </html>
