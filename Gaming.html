@@ -1,162 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon" />
-  <title>All Videos | Wert-Web</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon">
 
-  <!-- SEO Meta Tags -->
-  <meta name="description" content="Explore all Wert-Web videos in one place! Featuring gaming content, Roblox adventures, Minecraft builds, and much more.">
-  <meta name="keywords" content="Wert-Web, gaming videos, Roblox, Minecraft, Wert Web videos, YouTube, interactive HTML5 site">
-  <meta name="author" content="Wert-Web Creator">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta property="og:title" content="Wert-Web | All Gaming Videos">
-  <meta property="og:description" content="Watch all Wert-Web gaming videos, from Roblox to Minecraft and more.">
-  <meta property="og:image" content="Wert_2031.ico">
+  <!-- SEO -->
+  <title>Wert-Web | Gaming Videos</title>
+  <meta name="description" content="Browse all gaming videos by Wert_2031, including Roblox, Minecraft, and other games.">
+  <meta name="keywords" content="wert-web, gaming, videos, Roblox, Minecraft, Wert_2031">
+  <meta name="author" content="Wert_2031">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Wert-Web | Gaming Videos">
+  <meta property="og:description" content="Browse all gaming videos by Wert_2031, including Roblox, Minecraft, and other games.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourusername.github.io/your-repo/gaming.html">
+  <meta property="og:image" content="Wert_2031.ico">
 
-  <link rel="stylesheet" type="text/css" href="Main-Style.css"> 
+  <link rel="stylesheet" href="Main-Style.css">
+  <style>
+    /* Simple page-specific styles (keeps main site look) */
+    main { padding: 1rem; margin-top: 72px; /* leave space under fixed navbar */ }
+    h1, h2, h3 { text-align: center; }
+    #contents { max-width: 900px; margin: 0 auto 1rem; }
+    .video-grid { display:flex; flex-wrap:wrap; gap:16px; justify-content:center; }
+    .video-container { flex: 1 1 560px; max-width:560px; display:flex; justify-content:center; }
+    .controls { text-align:center; margin: 12px 0 28px; }
+    .btn {
+      display:inline-block;
+      margin:6px;
+      padding:10px 16px;
+      font-size:0.95rem;
+      cursor:pointer;
+      border: none;
+      border-radius:8px;
+      background:#0078ff;
+      color:#fff;
+      transition: background .2s ease;
+    }
+    .btn:hover { background:#005fcc; }
+    .btn.secondary { background:#666; }
+    @media (max-width:600px) {
+      .video-container { flex: 1 1 100%; max-width: 100%; }
+      iframe { width:100%; height:200px; }
+    }
+  </style>
 </head>
-
 <body>
+  <!-- Navbar include -->
   <div id="navbar"></div>
 
   <script>
-  // Load navbar and attach sounds
-  fetch("navbar.html")
-    .then(response => response.text())
-    .then(data => {
-      document.getElementById("navbar").innerHTML = data;
+    // load navbar.html and attach sounds + active highlighting
+    fetch("navbar.html")
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById("navbar").innerHTML = html;
 
-      const hoverSound = new Audio("sounds/hover.wav");
-      const clickSound = new Audio("sounds/click.wav");
-      let interacted = false;
-      document.addEventListener("click", () => { interacted = true; }, { once: true });
+        const hoverSound = new Audio("hover.wav");
+        const clickSound = new Audio("click.wav");
+        let interacted = false;
+        document.addEventListener("click", () => { interacted = true; }, { once: true });
 
-      const links = document.querySelectorAll(".navbar a");
-      links.forEach(link => {
-        link.addEventListener("mouseenter", () => {
-          if (interacted) {
-            hoverSound.currentTime = 0;
-            hoverSound.play();
-          }
+        const links = document.querySelectorAll(".navbar a");
+        links.forEach(link => {
+          link.addEventListener("mouseenter", () => {
+            if (interacted) { hoverSound.currentTime = 0; hoverSound.play(); }
+          });
+          link.addEventListener("click", () => { clickSound.currentTime = 0; clickSound.play(); });
+
+          // active page highlight
+          const currentPage = window.location.pathname.split("/").pop();
+          if (link.getAttribute("href") === currentPage) { link.classList.add("active"); }
         });
-        link.addEventListener("click", () => {
-          clickSound.currentTime = 0;
-          clickSound.play();
-        });
-
-        // Highlight active page
-        const currentPage = window.location.pathname.split("/").pop();
-        if (link.getAttribute("href") === currentPage) {
-          link.classList.add("active");
-        }
-      });
-    });
+      })
+      .catch(err => console.error("Failed to load navbar:", err));
   </script>
 
   <main>
-    <h1>All Wert-Web Videos</h1>
-    <p id="Intro-p">Welcome! This page contains every gaming video I’ve made — sorted by category and popularity. Use the button below to load more videos gradually to save data and bandwidth.</p>
+    <h1>Gaming Videos</h1>
+    <p id="Intro-p" style="text-align:center; max-width:900px; margin:0.5rem auto 1.5rem;">
+      Welcome to the Gaming section of Wert-Web! Browse videos by category. Use the Load More and Load Less buttons to control how many videos load (saves bandwidth).
+    </p>
 
-    <h2>Contents</h2>
-    <ol>
-      <li><a href="#Roblox">Roblox</a></li>
-      <li><a href="#Minecraft">Minecraft</a></li>
-    </ol>
-
-    <section id="Roblox">
-      <h3>Roblox</h3>
-      <div id="roblox-videos" class="video-grid"></div>
-      <button id="load-roblox" class="load-btn">Load More Roblox Videos</button>
+    <section id="contents" aria-label="Contents">
+      <h2>Contents (Ordered by Popularity)</h2>
+      <ol>
+        <li><a href="#Roblox">Roblox</a></li>
+        <li><a href="#Minecraft">Minecraft</a></li>
+        <li><a href="#OtherGames">Other Games</a></li>
+      </ol>
     </section>
 
-    <section id="Minecraft">
-      <h3>Minecraft</h3>
-      <div id="minecraft-videos" class="video-grid"></div>
-      <button id="load-minecraft" class="load-btn">Load More Minecraft Videos</button>
+    <!-- ROBLOX -->
+    <section id="Roblox" aria-labelledby="roblox-heading">
+      <h2 id="roblox-heading">Roblox</h2>
+      <div id="roblox-grid" class="video-grid" aria-live="polite"></div>
+
+      <div class="controls">
+        <button id="roblox-load" class="btn">Load More</button>
+        <button id="roblox-unload" class="btn secondary" style="display:none;">Load Less</button>
+      </div>
+    </section>
+
+    <!-- MINECRAFT -->
+    <section id="Minecraft" aria-labelledby="minecraft-heading">
+      <h2 id="minecraft-heading">Minecraft</h2>
+      <div id="minecraft-grid" class="video-grid" aria-live="polite"></div>
+
+      <div class="controls">
+        <button id="minecraft-load" class="btn">Load More</button>
+        <button id="minecraft-unload" class="btn secondary" style="display:none;">Load Less</button>
+      </div>
+    </section>
+
+    <!-- OTHER GAMES -->
+    <section id="OtherGames" aria-labelledby="other-heading">
+      <h2 id="other-heading">Other Games</h2>
+      <div id="other-grid" class="video-grid" aria-live="polite"></div>
+
+      <div class="controls">
+        <button id="other-load" class="btn">Load More</button>
+        <button id="other-unload" class="btn secondary" style="display:none;">Load Less</button>
+      </div>
     </section>
   </main>
 
   <script>
-  // Store video data
-  const robloxVideos = [
-    "NHbcGTuF4Jg","nzfTHaP0-DU","mZGiCQhGjLM","r9-0rNk_eOY","Xk58dNgJ6WA","ThUoTBurmrE",
-    "KMBUehrr8RU","FQAvD97cNW8","g5JIxrbTHcc"
-  ];
-  const minecraftVideos = [
-    "7nf6lq8To9M","Prg2djGirdY","dhZWpbAdv3Q","5pd-wrcdEYQ","2YRuxAhGGKk","TS8GVVPGC6g",
-    "FettRYf9DrI","DxWrMr2LK2g","cobts_27tug","VHIg8SaYG64","TwMfWzvEP9o","PBUC0Avcdzs",
-    "5tlzMdaS-tc","TO8fjt4qqz4","kAcyCKbnpQ4","QskuaglpoLA"
-  ];
+    /* === Video ID lists ===
+       Note: removed the 6th Roblox ID as requested.
+    */
+    const robloxVideos = [
+      "NHbcGTuF4Jg","nzfTHaP0-DU","mZGiCQhGjLM","r9-0rNk_eOY","Xk58dNgJ6WA",
+      /* removed "ThUoTBurmrE" (6th) */ "KMBUehrr8RU","FQAvD97cNW8","g5JIxrbTHcc"
+    ];
 
-  function createVideoIframe(id) {
-    const iframe = document.createElement("iframe");
-    iframe.width = "560";
-    iframe.height = "315";
-    iframe.src = `https://www.youtube.com/embed/${id}`;
-    iframe.title = "YouTube video player";
-    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-    iframe.referrerPolicy = "strict-origin-when-cross-origin";
-    iframe.allowFullscreen = true;
-    return iframe;
-  }
+    const minecraftVideos = [
+      "7nf6lq8To9M","Prg2djGirdY","dhZWpbAdv3Q","5pd-wrcdEYQ","2YRuxAhGGKk",
+      "TS8GVVPGC6g","FettRYf9DrI","DxWrMr2LK2g","cobts_27tug","VHIg8SaYG64",
+      "7nf6lq8To9M","TwMfWzvEP9o","PBUC0Avcdzs","5tlzMdaS-tc","TO8fjt4qqz4",
+      "kAcyCKbnpQ4","QskuaglpoLA"
+    ];
 
-  function loadVideos(category, containerId, list, count) {
-    const container = document.getElementById(containerId);
-    const currentCount = container.children.length;
-    const nextVideos = list.slice(currentCount, currentCount + count);
-    nextVideos.forEach(id => {
-      const div = document.createElement("div");
-      div.classList.add("video-container");
-      div.appendChild(createVideoIframe(id));
-      container.appendChild(div);
-    });
-    if (container.children.length >= list.length) {
-      document.getElementById("load-" + category).style.display = "none";
+    const otherVideos = [
+      "FDfZIpQI0kc","Vj6I_Uj5JTs","m2M4YKF83Tc"
+    ];
+
+    /* === Utility: create iframe element === */
+    function createIframe(id) {
+      const iframe = document.createElement("iframe");
+      iframe.width = "560";
+      iframe.height = "315";
+      iframe.src = `https://www.youtube.com/embed/${id}`;
+      iframe.title = `Wert-Web video ${id}`;
+      iframe.frameBorder = "0";
+      iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      iframe.allowFullscreen = true;
+      return iframe;
     }
-  }
 
-  document.getElementById("load-roblox").addEventListener("click", () => {
-    loadVideos("roblox", "roblox-videos", robloxVideos, 3);
-  });
+    /* === Batch logic: load/unload 1/3 at a time === */
+    function batchSize(list) {
+      // split into 3 roughly equal batches
+      return Math.ceil(list.length / 3);
+    }
 
-  document.getElementById("load-minecraft").addEventListener("click", () => {
-    loadVideos("minecraft", "minecraft-videos", minecraftVideos, 4);
-  });
+    function loadNextBatch(list, containerId) {
+      const container = document.getElementById(containerId);
+      const already = container.children.length;
+      const size = batchSize(list);
+      const slice = list.slice(already, already + size);
+      slice.forEach(id => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "video-container";
+        wrapper.appendChild(createIframe(id));
+        container.appendChild(wrapper);
+      });
+      return container.children.length;
+    }
 
-  // Initial few videos
-  loadVideos("roblox", "roblox-videos", robloxVideos, 3);
-  loadVideos("minecraft", "minecraft-videos", minecraftVideos, 4);
+    function unloadLastBatch(list, containerId) {
+      const container = document.getElementById(containerId);
+      const size = batchSize(list);
+      let removed = 0;
+      for (let i = 0; i < size; i++) {
+        const last = container.lastElementChild;
+        if (!last) break;
+        container.removeChild(last);
+        removed++;
+      }
+      return removed;
+    }
+
+    function setupCategory(list, containerId, loadBtnId, unloadBtnId) {
+      const loadBtn = document.getElementById(loadBtnId);
+      const unloadBtn = document.getElementById(unloadBtnId);
+      const container = document.getElementById(containerId);
+      const size = batchSize(list);
+
+      // initial load: first batch
+      loadNextBatch(list, containerId);
+      updateButtons();
+
+      loadBtn.addEventListener("click", () => {
+        loadNextBatch(list, containerId);
+        updateButtons();
+      });
+
+      unloadBtn.addEventListener("click", () => {
+        unloadLastBatch(list, containerId);
+        updateButtons();
+      });
+
+      function updateButtons() {
+        const loaded = container.children.length;
+        // show/hide load button
+        if (loaded >= list.length) {
+          loadBtn.style.display = "none";
+        } else {
+          loadBtn.style.display = "inline-block";
+        }
+        // show/hide unload button (only show if more than 1 batch loaded)
+        if (loaded > size) {
+          unloadBtn.style.display = "inline-block";
+        } else {
+          unloadBtn.style.display = "none";
+        }
+      }
+    }
+
+    // Initialize categories
+    setupCategory(robloxVideos, "roblox-grid", "roblox-load", "roblox-unload");
+    setupCategory(minecraftVideos, "minecraft-grid", "minecraft-load", "minecraft-unload");
+    setupCategory(otherVideos, "other-grid", "other-load", "other-unload");
   </script>
-
-  <style>
-    .video-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-    }
-    .video-container {
-      flex: 1 1 560px;
-      display: flex;
-      justify-content: center;
-    }
-    .load-btn {
-      display: block;
-      margin: 20px auto;
-      padding: 10px 20px;
-      font-size: 1rem;
-      background: #0078ff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .load-btn:hover {
-      background: #005fcc;
-    }
-  </style>
 </body>
 </html>
