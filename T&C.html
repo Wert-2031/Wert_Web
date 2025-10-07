@@ -8,31 +8,45 @@
     <link rel="stylesheet" type="text/css" href="Main-Style.css"> 
 </head>
 <body>
-    <div id="navbar"></div>
+  <div id="navbar"></div>
 
 <script>
-  // Load navbar.html into #navbar
-  fetch("navbar.html")
-    .then(response => response.text())
-    .then(data => {
-      document.getElementById("navbar").innerHTML = data;
+fetch("navbar.html")
+  .then(response => response.text())
+  .then(data => {
+    document.getElementById("navbar").innerHTML = data;
 
-      // After loading, attach sounds
-      const hoverSound = new Audio("sounds/hover.wav");
-      const clickSound = new Audio("sounds/click.wav");
+    // Load .wav sounds
+    const hoverSound = new Audio("hover.wav");
+    const clickSound = new Audio("click.wav");
 
-      document.querySelectorAll(".navbar a").forEach(link => {
-        link.addEventListener("mouseenter", () => {
+    // Ensure hover sound plays only after first interaction
+    let interacted = false;
+    document.addEventListener("click", () => { interacted = true; }, { once: true });
+
+    // Apply sounds and active page highlight
+    const links = document.querySelectorAll(".navbar a");
+    links.forEach(link => {
+      link.addEventListener("mouseenter", () => {
+        if (interacted) {
           hoverSound.currentTime = 0;
           hoverSound.play();
-        });
-        link.addEventListener("click", () => {
-          clickSound.currentTime = 0;
-          clickSound.play();
-        });
+        }
       });
+      link.addEventListener("click", () => {
+        clickSound.currentTime = 0;
+        clickSound.play();
+      });
+
+      // Active page
+      const currentPage = window.location.pathname.split("/").pop();
+      if (link.getAttribute("href") === currentPage) {
+        link.classList.add("active");
+      }
     });
+  });
 </script>
+
 <section>
   <h1>Terms and Conditions</h1>
   <p><strong>Effective Date:</strong> October 3, 2025</p>

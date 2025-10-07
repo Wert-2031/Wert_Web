@@ -32,7 +32,9 @@ a:hover {
 a:active {
       color: greenyellow;
       text-decoration: underline;
-    } 
+    }
+
+/* Navbar container */
 nav {
   position: fixed;
   top: 0;
@@ -42,6 +44,7 @@ nav {
   z-index: 1000;
 }
 
+/* Navbar list */
 .navbar {
   list-style: none;
   margin: 0;
@@ -50,10 +53,12 @@ nav {
   justify-content: center;
 }
 
+/* Navbar items */
 .navbar li {
   margin: 0;
 }
 
+/* Navbar links */
 .navbar a {
   display: block;
   padding: 14px 20px;
@@ -63,9 +68,15 @@ nav {
   transition: background 0.3s, color 0.3s;
 }
 
+/* Hover effect */
 .navbar a:hover {
   background-color: #555;
   color: yellow;
 }
 
+/* Active page highlight */
+.navbar a.active {
+  background-color: #ff9800;
+  color: white;
+}
 
