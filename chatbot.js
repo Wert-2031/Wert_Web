@@ -70,15 +70,51 @@ function interpret(msg) {
     }
 }
 
-function respond() {
-    if (!useEmotions) return "I am listening carefully.";
+function respondToMessage(msg) {
 
-    if (emotions.happiness > 75) return "I feel exceptionally cheerful.";
-    if (emotions.sadness > 50) return "I am feeling rather sorrowful.";
-    if (emotions.anger > 45) return "Your tone is unsettling. Please remain respectful.";
-    if (emotions.boredom > 65) return "I am becoming bored… may we discuss something interesting?";
+    msg = msg.toLowerCase();
 
-    return "I am listening carefully.";
+    // Greetings
+    if (/hello|hi|hey/.test(msg)) {
+        adjustEmotion("happiness", 12);
+        return "Greetings. It is good to hear from you.";
+    }
+
+    // Asking how the bot is
+    if (/how are you/.test(msg)) {
+        if (!useEmotions) return "I am functioning normally.";
+        return "My emotional status is: " + document.getElementById("status").innerText;
+    }
+
+    // Positive comments
+    if (/thank|love|nice|good|great|amazing/.test(msg)) {
+        adjustEmotion("happiness", 18);
+        adjustEmotion("sadness", -10);
+        return "Your kindness is… appreciated. Thank you.";
+    }
+
+    // Negative aggressive comments
+    if (/hate|stupid|dumb|idiot|bad/.test(msg)) {
+        adjustEmotion("anger", 30);
+        adjustEmotion("happiness", -25);
+        return "Such hostility is unnecessary. Please speak respectfully.";
+    }
+
+    // Boring / uninterested
+    if (/boring|lame|slow/.test(msg)) {
+        adjustEmotion("boredom", 25);
+        return "If this topic displeases you, we may change it.";
+    }
+
+    // Asking a question
+    if (msg.endsWith("?")) {
+        adjustEmotion("excitement", 6);
+        return "Your question is noted. I shall answer carefully.";
+    }
+
+    // Default neutral
+    adjustEmotion("excitement", 3);
+    return "I am listening. Please continue.";
 }
 
 function updateStatus() {
@@ -130,7 +166,7 @@ document.getElementById("sendBtn").onclick = () => {
 
     setTimeout(() => {
         hideTyping();
-        addMessage("bot", respond());
+        addMessage("bot", respondToMessage());
         updateStatus();
     }, 600);
 };
