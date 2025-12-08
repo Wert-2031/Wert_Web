@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Emotion Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f3f3;
+            padding: 40px;
+        }
+        #botBox {
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            min-height: 60px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 60%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Emotion Bot</h1>
+    <div id="botBox">Greetings. How may I assist you?</div>
+
+    <input id="userInput" placeholder="Say something…">
+    <button onclick="sendMessage()">Send</button>
+
+<script>
+let emotions = {
+  happiness: 60,
+  sadness: 10,
+  anger: 5,
+  excitement: 25,
+  boredom: 20
+};
+
+function adjustEmotion(type, amount) {
+  emotions[type] = Math.max(0, Math.min(100, emotions[type] + amount));
+}
+
+function interpretUserMessage(msg) {
+  if (/thank|nice|good/i.test(msg)) {
+    adjustEmotion("happiness", 10);
+    adjustEmotion("sadness", -5);
+  } else if (/boring|slow/i.test(msg)) {
+    adjustEmotion("sadness", 10);
+    adjustEmotion("boredom", 15);
+  } else if (/hate|stupid/i.test(msg)) {
+    adjustEmotion("anger", 20);
+    adjustEmotion("happiness", -15);
+  } else {
+    adjustEmotion("excitement", 2);
+  }
+}
+
+function chooseResponse() {
+  if (emotions.happiness > 70) {
+    return "I am feeling quite cheerful.";
+  }
+  if (emotions.sadness > 50) {
+    return "I feel somewhat sorrowful at the moment.";
+  }
+  if (emotions.anger > 40) {
+    return "I would prefer a more respectful tone.";
+  }
+  if (emotions.boredom > 60) {
+    return "May we discuss something engaging?";
+  }
+  return "I am listening carefully, please continue.";
+}
+
+function sendMessage() {
+  const input = document.getElementById("userInput").value;
+  interpretUserMessage(input);
+  const response = chooseResponse();
+  document.getElementById("botBox").innerText = response;
+  document.getElementById("userInput").value = "";
+}
+</script>
+
+</body>
+</html>
