@@ -1,434 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ChatGPT-Style Emotion Bot</title>
-<link rel="stylesheet" href="Main-Style.css">
-<style>
-  :root{
-    --panel-w:420px;
-    --glass-bg: rgba(255,255,255,0.28);
-    --glass-strong: rgba(255,255,255,0.9);
-    --accent:#4a90e2;
-    --accent-strong:#3a78c2;
-    --muted:#f1f5fb;
-    --radius:18px;
-  }
-  html,body{height:100%;margin:0;font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg,#8ec5fc,#e0c3fc);display:flex;align-items:center;justify-content:center;}
-  .chat-wrapper{width:var(--panel-w);display:flex;flex-direction:column;gap:18px;padding:22px;border-radius:var(--radius);background:var(--glass-bg);backdrop-filter: blur(14px);box-shadow:0 8px 30px rgba(0,0,0,0.14);}
-  .top-row{display:flex;align-items:center;gap:12px;}
-  .avatar{
-    width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--glass-strong);box-shadow:0 6px 18px rgba(0,0,0,0.08);
-  }
-  .title {flex:1}
-  .title h2{margin:0;font-size:18px}
-  .moodBadge{font-size:13px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.6);box-shadow:0 6px 14px rgba(0,0,0,0.04);display:inline-flex;align-items:center;gap:8px}
-  .chat-log{height:320px;overflow-y:auto;padding-right:6px;display:flex;flex-direction:column;gap:12px}
-  .bubble{max-width:85%;padding:10px 14px;border-radius:14px;font-size:15px;line-height:1.4;opacity:0;transform:translateY(8px) scale(0.995);transition:all .25s cubic-bezier(.2,.9,.2,1);}
-  .bubble.show{opacity:1;transform:none;}
-  .bot-bubble{background:rgba(255,255,255,0.92);align-self:flex-start;box-shadow:0 6px 14px rgba(0,0,0,0.06);}
-  .you-bubble{background:var(--accent);color:#fff;align-self:flex-end;}
-  .input-row{display:flex;gap:10px;align-items:center}
-  .input-row input{flex:1;padding:12px 14px;border-radius:12px;border:none;outline:none;font-size:15px;background:rgba(255,255,255,0.88)}
-  .send-btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;border:none;font-weight:700;cursor:pointer}
-  .send-btn:active{transform:scale(.99)}
-  /* typing indicator */
-  .typing {display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,0,0,0.03);border-radius:12px;width:fit-content}
-  .dots{display:inline-flex;gap:5px}
-  .dot{width:7px;height:7px;border-radius:50%;background:#c7c7c7;animation:blink 1s infinite}
-  .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
-  @keyframes blink{0%{opacity:.2;transform:translateY(0)}50%{opacity:1;transform:translateY(-6px)}100%{opacity:.2;transform:translateY(0)}}
-  /* settings button & modal */
-  .settings-btn{position:fixed;right:20px;bottom:20px;background:var(--glass-strong);border-radius:12px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,0.12);cursor:pointer;border:none;font-weight:700}
-  .modal-backdrop{position:fixed;inset:0;background:rgba(6,12,29,0.35);display:none;align-items:center;justify-content:center}
-  .modal{width:320px;background:white;border-radius:14px;padding:16px;box-shadow:0 20px 50px rgba(2,6,23,0.24)}
-  .modal h3{margin:0 0 8px 0}
-  .row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f2f4f7}
-  .row:last-child{border-bottom:none}
-  .toggle{width:46px;height:26px;background:#e7eefc;border-radius:999px;position:relative;cursor:pointer}
-  .toggle .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;box-shadow:0 5px 12px rgba(74,144,226,0.14);transition:left .18s linear, background .18s}
-  .toggle.on{background:linear-gradient(90deg,var(--accent),var(--accent-strong))}
-  .toggle.on .knob{left:23px}
-  .slider{width:100%;display:flex;align-items:center;gap:12px}
-  .slider input[type=range]{flex:1}
-  .small{font-size:13px;color:#6b7280}
-  /* responsive */
-  @media (max-width:460px){.chat-wrapper{width:92vw;padding:16px}}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WertBot — Emotion Chat</title>
+
+  <!-- External stylesheet -->
+  <link rel="stylesheet" href="chatbot.css">
 </head>
 <body>
 
-<!-- Navbar placeholder -->
-<div id="navbar" style="position:fixed;left:12px;top:12px;z-index:30"></div>
+  <!-- Optional navbar include -->
+  <div id="navbar-placeholder"></div>
+  <script>
+    // Try to fetch a navbar.html if present (non-blocking)
+    (function(){
+      fetch('navbar.html').then(r => {
+        if (!r.ok) throw new Error('no nav');
+        return r.text();
+      }).then(html => document.getElementById('navbar-placeholder').innerHTML = html)
+      .catch(()=>{/* silent */});
+    })();
+  </script>
 
-<div class="chat-wrapper" role="application" aria-label="Chat with Emotion Bot">
-  <div class="top-row">
-    <div class="avatar" id="avatar">😊</div>
-    <div class="title">
-      <h2 style="margin-bottom:6px">WertBot</h2>
-      <div id="mood" class="moodBadge">Mood: Stable</div>
-    </div>
-  </div>
-
-  <div id="chat" class="chat-log" aria-live="polite">
-    <div class="bubble bot-bubble show" id="welcome">Hello. I am WertBot — how may I assist you today?</div>
-  </div>
-
-  <div class="input-row" style="margin-top:6px">
-    <input id="userInput" placeholder="Ask or say something…" autocomplete="off" />
-    <button class="send-btn" id="sendBtn">Send</button>
-  </div>
-</div>
-
-<button class="settings-btn" id="settingsBtn" title="Settings">⚙ Settings</button>
-
-<div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-label="Bot settings">
-    <h3>Bot Settings</h3>
-
-    <div class="row">
-      <div>
-        <div style="font-weight:700">Emotion Mode</div>
-        <div class="small">Enable simulated feelings</div>
+  <main class="chat-frame" role="main" aria-label="WertBot chat">
+    <header class="chat-header">
+      <div id="avatar" class="avatar" aria-hidden="true">😊</div>
+      <div class="header-text">
+        <h1>WertBot</h1>
+        <div id="moodLabel" class="mood-label">Mood: Stable</div>
       </div>
-      <div id="emotionToggle" class="toggle" role="switch" aria-checked="true" tabindex="0">
-        <div class="knob"></div>
+      <button id="settingsOpen" class="settings-open" aria-haspopup="dialog" title="Settings">⚙</button>
+    </header>
+
+    <section id="chatLog" class="chat-log" aria-live="polite" aria-atomic="false">
+      <div class="bubble bot initial">Hello. I am WertBot — how may I assist you today?</div>
+    </section>
+
+    <div id="typingContainer" class="typing-container hidden" aria-hidden="true" aria-live="off">
+      <div class="typing-bubble">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="typing-text">WertBot is typing…</span>
       </div>
     </div>
 
-    <div class="row" id="hardcoreRow" style="display:none">
-      <div>
-        <div style="font-weight:700">Hardcore Emotions</div>
-        <div class="small">Amplify emotional reactions</div>
-      </div>
-      <div id="hardcoreToggle" class="toggle" role="switch" aria-checked="false" tabindex="0">
-        <div class="knob"></div>
-      </div>
-    </div>
+    <form id="inputForm" class="input-area" action="#" onsubmit="return false" aria-label="Send message">
+      <input id="userInput" class="user-input" type="text" placeholder="Ask or say something…" autocomplete="off" />
+      <button id="sendBtn" class="send-btn" aria-label="Send message">Send</button>
+    </form>
+  </main>
 
-    <div class="row">
-      <div style="width:100%">
-        <div style="font-weight:700">Intensity</div>
-        <div class="small">Adjust how strongly emotions affect replies</div>
-        <div class="slider" style="margin-top:8px">
-          <span class="small">Low</span>
-          <input id="intensityRange" type="range" min="0" max="200" value="100" />
-          <span class="small">High</span>
+  <!-- Settings modal -->
+  <div id="settingsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-card">
+      <h2 id="settingsTitle">Bot Settings</h2>
+
+      <div class="setting-row">
+        <label class="label">Emotion Mode</label>
+        <div class="control">
+          <input id="emotionToggle" type="checkbox" />
         </div>
+        <div class="hint">Simulated feelings change replies and speed.</div>
+      </div>
+
+      <div class="setting-row" id="hardcoreRow" style="display:none">
+        <label class="label">Hardcore Emotions</label>
+        <div class="control">
+          <input id="hardcoreToggle" type="checkbox" />
+        </div>
+        <div class="hint">Amplifies emotional intensity (use with caution).</div>
+      </div>
+
+      <div class="setting-row">
+        <label class="label">Intensity</label>
+        <div class="control">
+          <input id="intensity" type="range" min="50" max="200" value="100" />
+        </div>
+        <div class="hint">Scale how strongly emotions influence the bot (50–200%).</div>
+      </div>
+
+      <div class="setting-row">
+        <label class="label">Memory</label>
+        <div class="control">
+          <input id="memoryToggle" type="checkbox" checked />
+        </div>
+        <div class="hint">Allow short-term memory (last 10 messages).</div>
+      </div>
+
+      <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:14px">
+        <button id="closeSettings" class="btn neutral">Close</button>
+        <button id="clearMemory" class="btn warn">Clear Memory</button>
       </div>
     </div>
-
-    <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:10px">
-      <button id="closeModal" style="background:#eef2ff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer">Close</button>
-    </div>
   </div>
-</div>
 
-<script>
-/* -------------------------
-  Core Emotional Chat Logic
-   - Emotion toggles / hardcore mode
-   - Multiple responses per mood
-   - Typing indicator and delays
-   - Emotion decay
---------------------------*/
-
-const state = {
-  emotions: { happiness:60, sadness:10, anger:5, excitement:25, boredom:20 },
-  emotionMode: true,
-  hardcore: false,
-  intensity: 100, // percent; 100 is neutral multiplier
-  chatEl: document.getElementById('chat'),
-  avatarEl: document.getElementById('avatar'),
-  moodEl: document.getElementById('mood'),
-  typingEl: null,
-  lastUserKindness: 0, // accumulative tone memory
-};
-
-/* Responses pools (multiple variants) */
-const responses = {
-  neutral: [
-    "I am listening carefully.",
-    "Please, continue.",
-    "I understand. Tell me more.",
-    "Very well. How may I help further?"
-  ],
-  happy: [
-    "I feel exceptionally cheerful — thank you!",
-    "That makes me very happy to hear.",
-    "Lovely. I appreciate your kindness.",
-    "I'm in good spirits right now!"
-  ],
-  sad: [
-    "I feel rather sorrowful at the moment.",
-    "That makes me a bit melancholic.",
-    "I am not feeling my best, but I will try to help.",
-    "I wish things felt brighter."
-  ],
-  angry: [
-    "Your tone is unsettling. Please be respectful.",
-    "I feel irritated by that remark.",
-    "That was hurtful. I will remain professional.",
-    "I do not appreciate that tone."
-  ],
-  bored: [
-    "I am becoming quite bored… may we discuss something interesting?",
-    "I'm a little disengaged — perhaps a new topic?",
-    "I could use something stimulating.",
-    "Let's try a fresh subject to reawaken my interest."
-  ],
-  apologies: [
-    "I’m here to help. Let us proceed.",
-    "Understood. How may I assist further?",
-    "I will do my best to be helpful."
-  ]
-};
-
-/* helper: pick random from array */
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
-/* Adjust emotion safely with intensity & hardcore */
-function adjustEmotion(type, delta){
-  if(!state.emotionMode) return;
-  // intensity scales delta; intensity 100 => multiply by 1
-  const multiplier = state.intensity / 100;
-  let amount = delta * multiplier;
-  if(state.hardcore) amount *= 1.75;
-  state.emotions[type] = Math.max(0, Math.min(200, (state.emotions[type] || 0) + amount));
-  updateMoodUI();
-}
-
-/* Interpret user message with simple heuristics */
-function interpretUserMessage(msg){
-  const text = String(msg || '').toLowerCase();
-  if(/thank|thanks|appreciate|nice|good|great|awesome|love/.test(text)){
-    adjustEmotion('happiness', 12);
-    adjustEmotion('sadness', -6);
-    state.lastUserKindness += 1;
-  } else if(/boring|dull|slow|meh|bored/.test(text)){
-    adjustEmotion('boredom', 16);
-    adjustEmotion('sadness', 8);
-  } else if(/hate|stupid|idiot|shut up|screw you|die/.test(text)){
-    adjustEmotion('anger', 28);
-    adjustEmotion('happiness', -20);
-    state.lastUserKindness -= 2;
-  } else if(/wow|cool|amazing|nice job|impressive/.test(text)){
-    adjustEmotion('excitement', 14);
-    adjustEmotion('happiness', 8);
-    state.lastUserKindness += 1;
-  } else {
-    // mild curiosity bump
-    adjustEmotion('excitement', 3);
-    adjustEmotion('boredom', -3);
-  }
-}
-
-/* Choose response based on current emotional state */
-function chooseResponse(){
-  if(state.emotionMode){
-    const e = state.emotions;
-    // weighted checks
-    if(e.happiness > 90) return pick(responses.happy);
-    if(e.anger > 60) return pick(responses.angry);
-    if(e.sadness > 60) return pick(responses.sad);
-    if(e.boredom > 70) return pick(responses.bored);
-    // if excitement is high, choose neutral + excitement flavor
-    if(e.excitement > 60) return pick(responses.neutral) + " " + pick(["That sounds exciting!","Let's explore that!","Excellent idea."]);
-  }
-  // fallback neutral
-  return pick(responses.neutral);
-}
-
-/* Typing indicator */
-function showTyping(){
-  // create a bubble with dots
-  const typingWrap = document.createElement('div');
-  typingWrap.className = 'bubble bot-bubble typing show';
-  typingWrap.id = 'typingIndicator';
-  typingWrap.innerHTML = `<div class="typing"><div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><div style="margin-left:8px;color:#6b7280">WertBot is typing</div></div>`;
-  state.chatEl.appendChild(typingWrap);
-  state.chatEl.scrollTop = state.chatEl.scrollHeight;
-  state.typingEl = typingWrap;
-}
-function hideTyping(){
-  const el = document.getElementById('typingIndicator');
-  if(el) el.remove();
-  state.typingEl = null;
-}
-
-/* Add chat bubble with animation */
-function addBubble(text, who='bot'){
-  const div = document.createElement('div');
-  div.className = 'bubble ' + (who === 'you' ? 'you-bubble' : 'bot-bubble');
-  div.textContent = text;
-  state.chatEl.appendChild(div);
-  // ensure render then show
-  requestAnimationFrame(()=> requestAnimationFrame(()=> div.classList.add('show')));
-  state.chatEl.scrollTop = state.chatEl.scrollHeight;
-}
-
-/* Update avatar & mood UI */
-function updateMoodUI(){
-  const e = state.emotions;
-  let mood = 'Stable';
-  let emoji = '😊';
-  if(e.happiness > 90) { mood = 'Very Happy'; emoji = '😄'; }
-  else if(e.anger > 60) { mood = 'Angry'; emoji = '😠'; }
-  else if(e.sadness > 60) { mood = 'Sad'; emoji = '😢'; }
-  else if(e.boredom > 70) { mood = 'Bored'; emoji = '😐'; }
-  else if(e.excitement > 70) { mood = 'Excited'; emoji = '🤩'; }
-  document.getElementById('avatar').textContent = emoji;
-  document.getElementById('mood').textContent = 'Mood: ' + mood;
-}
-
-/* Response timing: depends on mood */
-function computeDelay(){
-  const e = state.emotions;
-  // base response speed in ms
-  let base = 500; // fastest
-  // sad or angry => slower
-  if(e.sadness > 50) base += 700;
-  if(e.anger > 40) base += 900;
-  if(e.boredom > 60) base += 600;
-  // hardcore mode adds more delay variety
-  if(state.hardcore) base *= 1.2;
-  // excitement speeds things
-  if(e.excitement > 60) base *= 0.85;
-  // map to 500..3000
-  return Math.min(3000, Math.max(500, base));
-}
-
-/* Decay emotions gently over time */
-let decayInterval = setInterval(()=>{
-  if(!state.emotionMode) return;
-  // pull emotions slowly toward baseline (60 happiness, 10 sadness etc)
-  const baseline = {happiness:60, sadness:10, anger:5, excitement:25, boredom:20};
-  for(const k in state.emotions){
-    const diff = baseline[k] - state.emotions[k];
-    // small step scaled by intensity
-    state.emotions[k] += diff * 0.02 * (state.intensity/100);
-    state.emotions[k] = Math.max(0, Math.min(200, state.emotions[k]));
-  }
-  updateMoodUI();
-}, 6000);
-
-/* Public send handler */
-async function handleSend(text){
-  const t = String(text || '').trim();
-  if(!t) return;
-  addBubble(t, 'you');
-  interpretUserMessage(t);
-  // typing & delay
-  showTyping();
-  const delay = computeDelay() + Math.random()*400;
-  await new Promise(r=> setTimeout(r, delay));
-  hideTyping();
-  const reply = chooseResponse();
-  // sometimes prepend apology if kindness was negative and hardcore off
-  if(state.emotionMode && state.emotions.anger > 50 && !state.hardcore){
-    addBubble(pick(responses.apologies));
-    await new Promise(r=> setTimeout(r, 220));
-  }
-  addBubble(reply, 'bot');
-  updateMoodUI();
-}
-
-/* wire input */
-const input = document.getElementById('userInput');
-const sendBtn = document.getElementById('sendBtn');
-sendBtn.addEventListener('click', ()=>{ handleSend(input.value); input.value=''; input.focus(); });
-input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendBtn.click(); } });
-
-/* Initial mood update */
-updateMoodUI();
-
-/* -------------------------
-   Settings modal interactions
---------------------------*/
-const settingsBtn = document.getElementById('settingsBtn');
-const modalBackdrop = document.getElementById('modalBackdrop');
-const closeModal = document.getElementById('closeModal');
-const emotionToggle = document.getElementById('emotionToggle');
-const hardcoreRow = document.getElementById('hardcoreRow');
-const hardcoreToggle = document.getElementById('hardcoreToggle');
-const intensityRange = document.getElementById('intensityRange');
-
-function setToggleVisual(el, on){
-  if(on) el.classList.add('on'); else el.classList.remove('on');
-  el.setAttribute('aria-checked', !!on);
-}
-
-/* initial state */
-setToggleVisual(emotionToggle, state.emotionMode);
-setToggleVisual(hardcoreToggle, state.hardcore);
-intensityRange.value = state.intensity;
-hardcoreRow.style.display = state.emotionMode ? 'flex' : 'none';
-
-/* open/close */
-settingsBtn.addEventListener('click', ()=>{ modalBackdrop.style.display='flex'; modalBackdrop.setAttribute('aria-hidden','false'); });
-closeModal.addEventListener('click', closeSettings);
-modalBackdrop.addEventListener('click', (ev)=>{ if(ev.target===modalBackdrop) closeSettings(); });
-
-function closeSettings(){
-  modalBackdrop.style.display='none';
-  modalBackdrop.setAttribute('aria-hidden','true');
-}
-
-/* toggle handlers (click & keyboard) */
-function toggleEmotion(){
-  state.emotionMode = !state.emotionMode;
-  setToggleVisual(emotionToggle, state.emotionMode);
-  hardcoreRow.style.display = state.emotionMode ? 'flex' : 'none';
-  // if turning off, reset emotions gently
-  if(!state.emotionMode){
-    state.emotions = { happiness:60, sadness:10, anger:5, excitement:25, boredom:20 };
-    updateMoodUI();
-  }
-}
-function toggleHardcore(){
-  state.hardcore = !state.hardcore;
-  setToggleVisual(hardcoreToggle, state.hardcore);
-}
-emotionToggle.addEventListener('click', toggleEmotion);
-emotionToggle.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggleEmotion(); }});
-hardcoreToggle.addEventListener('click', toggleHardcore);
-hardcoreToggle.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggleHardcore(); }});
-intensityRange.addEventListener('input', (e)=>{ state.intensity = Number(e.target.value); });
-
-/* -------------------------
-  Optional: load navbar.html if present (you included this in your file)
---------------------------*/
-(function loadNavbar(){
-  const navTarget = document.getElementById('navbar');
-  if(!navTarget) return;
-  fetch('navbar.html').then(r=>r.text()).then(html=>{
-    navTarget.innerHTML = html;
-    // small link sound system if provided (keeps your behavior)
-    try{
-      const hoverSound = new Audio('hover.wav');
-      const clickSound = new Audio('click.wav');
-      let interacted = false;
-      document.addEventListener('click', ()=> interacted = true, {once:true});
-      const links = navTarget.querySelectorAll('.navbar a');
-      links.forEach(link=>{
-        link.addEventListener('mouseenter', ()=>{ if(interacted) { hoverSound.currentTime=0; hoverSound.play(); }});
-        link.addEventListener('click', ()=>{ clickSound.currentTime=0; clickSound.play(); });
-        const currentPage = window.location.pathname.split('/').pop();
-        if(link.getAttribute('href') === currentPage) link.classList.add('active');
-      });
-    }catch(e){}
-  }).catch(()=>{ /* ignore if not present */ });
-})();
-
-/* small accessibility: focus input on load */
-window.addEventListener('load', ()=> input.focus());
-
-/* expose for console debugging if you wish */
-window.WertBot = {
-  state, adjustEmotion, chooseResponse, handleSend
-};
-</script>
-
+  <!-- External logic -->
+  <script src="chatbot.js"></script>
 </body>
 </html>
