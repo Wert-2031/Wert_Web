@@ -7,20 +7,37 @@
 
   <!-- External stylesheet -->
   <link rel="stylesheet" href="chatbot.css">
+  <link rel="stylesheet" href="Main-Style.css">
 </head>
 <body>
 
-  <!-- Optional navbar include -->
-  <div id="navbar-placeholder"></div>
+  <!-- Navbar Include -->
+  <div id="navbar"></div>
+
   <script>
-    // Try to fetch a navbar.html if present (non-blocking)
-    (function(){
-      fetch('navbar.html').then(r => {
-        if (!r.ok) throw new Error('no nav');
-        return r.text();
-      }).then(html => document.getElementById('navbar-placeholder').innerHTML = html)
-      .catch(()=>{/* silent */});
-    })();
+    fetch("navbar.html")
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById("navbar").innerHTML = data;
+
+        // Load sounds
+        const hoverSound = new Audio("hover.wav");
+        const clickSound = new Audio("click.wav");
+
+        let interacted = false;
+        document.addEventListener("click", () => { interacted = true; }, { once: true });
+
+        const links = document.querySelectorAll(".navbar a");
+        links.forEach(link => {
+          link.addEventListener("mouseenter", () => {
+            if (interacted) { hoverSound.currentTime = 0; hoverSound.play(); }
+          });
+          link.addEventListener("click", () => { clickSound.currentTime = 0; clickSound.play(); });
+
+          const currentPage = window.location.pathname.split("/").pop();
+          if (link.getAttribute("href") === currentPage) { link.classList.add("active"); }
+        });
+      });
   </script>
 
   <main class="chat-frame" role="main" aria-label="WertBot chat">
