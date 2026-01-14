@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon">
+    <title>Gemini's 3D Battle Royale</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; }
+        canvas { display: block; }
+
+        /* UI Overlays */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        
+        /* HUD */
+        #hud { position: absolute; bottom: 20px; left: 20px; color: white; pointer-events: none; }
+        .bar-container { width: 250px; height: 20px; background: rgba(0,0,0,0.5); border: 2px solid #fff; margin-bottom: 5px; border-radius: 5px; overflow: hidden; }
+        #health-bar { width: 100%; height: 100%; background: #ff4444; transition: width 0.3s; }
+        #shield-bar { width: 50%; height: 100%; background: #4444ff; transition: width 0.3s; }
+        
+        /* Hotbar */
+        #hotbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; pointer-events: auto; }
+        .slot { width: 60px; height: 60px; background: rgba(0,0,0,0.6); border: 3px solid #555; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .slot.active { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+        .slot-key { position: absolute; top: 2px; left: 4px; font-size: 10px; color: #aaa; }
+        .slot-rarity { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; }
+
+        /* Minimap */
+        #minimap-container { position: absolute; top: 20px; right: 20px; width: 150px; height: 150px; border: 3px solid rgba(255,255,255,0.5); background: rgba(0,0,0,0.3); border-radius: 50%; overflow: hidden; }
+        #minimap { width: 100%; height: 100%; position: relative; }
+        .map-dot { position: absolute; width: 6px; height: 6px; border-radius: 50%; transform: translate(-50%, -50%); }
+
+        /* Weapon Info */
+        #weapon-info { position: absolute; bottom: 100px; right: 20px; text-align: right; color: white; text-shadow: 2px 2px 4px #000; }
+        #weapon-name { font-size: 24px; font-weight: bold; }
+        #ammo-count { font-size: 18px; }
+
+        /* Screens */
+        .overlay-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; z-index: 100; pointer-events: auto; }
+        .btn { padding: 15px 40px; font-size: 20px; cursor: pointer; background: #2ecc71; border: none; color: white; border-radius: 5px; transition: 0.2s; margin-top: 20px; }
+        .btn:hover { background: #27ae60; transform: scale(1.05); }
+        
+        #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; pointer-events: none; }
+        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: white; }
+        #crosshair::before { width: 2px; height: 20px; left: 9px; }
+        #crosshair::after { width: 20px; height: 2px; top: 9px; }
+
+        .hidden { display: none !important; }
+
+        /* Rarity Colors */
+        .common { background: #bdc3c7; }
+        .uncommon { background: #2ecc71; }
+        .rare { background: #3498db; }
+        .epic { background: #9b59b6; }
+        .legendary { background: #f1c40f; }
+    </style>
+</head>
+<body>
+
+<div id="ui-layer">
+    <!-- Start Screen -->
+    <div id="start-screen" class="overlay-screen">
+        <h1>3D BATTLE ROYALE</h1>
+        <p>WASD to Move | Mouse to Shoot | Space to Jump | Q to Build</p>
+        <button class="btn" onclick="startGame()">START GAME</button>
+    </div>
+
+    <!-- Death Screen -->
+    <div id="death-screen" class="overlay-screen hidden">
+        <h1 style="color: #ff4444;">ELIMINATED</h1>
+        <div id="stats">
+            <p>Eliminations: <span id="stat-kills">0</span></p>
+            <p>Time Survived: <span id="stat-time">0s</span></p>
+        </div>
+        <button class="btn" onclick="location.reload()">PLAY AGAIN</button>
+    </div>
+
+    <!-- HUD Elements -->
+    <div id="crosshair"></div>
+    
+    <div id="hud">
+        <div class="bar-container"><div id="health-bar"></div></div>
+        <div class="bar-container"><div id="shield-bar"></div></div>
+    </div>
+
+    <div id="minimap-container">
+        <div id="minimap"></div>
+    </div>
+
+    <div id="weapon-info">
+        <div id="weapon-name">Pistol</div>
+        <div id="weapon-rarity" style="font-size: 14px; text-transform: uppercase;">Common</div>
+        <div id="ammo-count">30 / ∞</div>
+    </div>
+
+    <div id="hotbar">
+        <div class="slot active" id="slot-1"><span class="slot-key">1</span><div class="slot-rarity common"></div></div>
+        <div class="slot" id="slot-2"><span class="slot-key">2</span><div class="slot-rarity"></div></div>
+        <div class="slot" id="slot-3"><span class="slot-key">3</span><div class="slot-rarity"></div></div>
+        <div class="slot" id="slot-4"><span class="slot-key">4</span><div class="slot-rarity"></div></div>
+        <div class="slot" id="slot-5"><span class="slot-key">5</span><div class="slot-rarity"></div></div>
+    </div>
+</div>
+
+<script>
+/** * GAME CONFIGURATION & TEXTURES
+ */
+const TEXTURES = {
+    ground: 'Grasstexture.jpeg',
+    build: 'Woodtexture.jpeg',
+    fallback_color: 0x44aa44
+};
+
+const RARITIES = {
+    COMMON: { name: 'Common', color: '#bdc3c7', damage: 10, fireRate: 400 },
+    UNCOMMON: { name: 'Uncommon', color: '#2ecc71', damage: 15, fireRate: 350 },
+    RARE: { name: 'Rare', color: '#3498db', damage: 20, fireRate: 300 },
+    EPIC: { name: 'Epic', color: '#9b59b6', damage: 30, fireRate: 250 },
+    LEGENDARY: { name: 'Legendary', color: '#f1c40f', damage: 45, fireRate: 200 }
+};
+
+/**
+ * CORE ENGINE VARIABLES
+ */
+let scene, camera, renderer, clock;
+let player, terrain, minimap;
+let worldSize = 500;
+let gameState = 'START';
+let keys = {};
+let mouseX = 0, mouseY = 0;
+let entities = {
+    enemies: [],
+    bullets: [],
+    vehicles: [],
+    pickups: [],
+    builds: []
+};
+
+let stats = { kills: 0, startTime: 0 };
+let textureLoader = new THREE.TextureLoader();
+
+/**
+ * INITIALIZATION
+ */
+function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87ceeb); // Sky blue
+    scene.fog = new THREE.Fog(0x87ceeb, 50, 400);
+
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    clock = new THREE.Clock();
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+    sun.position.set(100, 200, 100);
+    sun.castShadow = true;
+    sun.shadow.camera.left = -300;
+    sun.shadow.camera.right = 300;
+    sun.shadow.camera.top = 300;
+    sun.shadow.camera.bottom = -300;
+    scene.add(sun);
+
+    setupWorld();
+    setupPlayer();
+    spawnInitialEntities();
+
+    // Listeners
+    window.addEventListener('resize', onWindowResize);
+    document.addEventListener('keydown', (e) => keys[e.code] = true);
+    document.addEventListener('keyup', (e) => keys[e.code] = false);
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mousemove', onMouseMove);
+    
+    // Lock pointer for mouse look
+    renderer.domElement.onclick = () => {
+        if (gameState === 'PLAYING') renderer.domElement.requestPointerLock();
+    };
+
+    animate();
+}
+
+/**
+ * WORLD GENERATION
+ */
+function setupWorld() {
+    // Ground
+    const groundGeo = new THREE.PlaneGeometry(worldSize, worldSize);
+    let groundMat;
+    
+    try {
+        const tex = textureLoader.load(TEXTURES.ground);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(50, 50);
+        groundMat = new THREE.MeshStandardMaterial({ map: tex });
+    } catch(e) {
+        groundMat = new THREE.MeshStandardMaterial({ color: TEXTURES.fallback_color });
+    }
+    
+    terrain = new THREE.Mesh(groundGeo, groundMat);
+    terrain.rotation.x = -Math.PI / 2;
+    terrain.receiveShadow = true;
+    scene.add(terrain);
+
+    // Simple Boundaries
+    const wallGeo = new THREE.BoxGeometry(worldSize, 20, 5);
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    for(let i=0; i<4; i++) {
+        const wall = new THREE.Mesh(wallGeo, wallMat);
+        const angle = (i * Math.PI) / 2;
+        wall.position.x = Math.cos(angle) * (worldSize/2);
+        wall.position.z = Math.sin(angle) * (worldSize/2);
+        wall.rotation.y = -angle + Math.PI/2;
+        scene.add(wall);
+    }
+
+    // Static Buildings
+    for(let i=0; i<10; i++) {
+        createBuilding(
+            (Math.random() - 0.5) * (worldSize * 0.7),
+            (Math.random() - 0.5) * (worldSize * 0.7)
+        );
+    }
+}
+
+function createBuilding(x, z) {
+    const group = new THREE.Group();
+    const size = 10 + Math.random() * 10;
+    const height = 15 + Math.random() * 20;
+    
+    const geo = new THREE.BoxGeometry(size, height, size);
+    const mat = new THREE.MeshStandardMaterial({ color: 0x7f8c8d });
+    const b = new THREE.Mesh(geo, mat);
+    b.position.y = height / 2;
+    b.castShadow = true;
+    b.receiveShadow = true;
+    group.add(b);
+    
+    group.position.set(x, 0, z);
+    scene.add(group);
+}
+
+/**
+ * PLAYER SYSTEM
+ */
+function setupPlayer() {
+    player = {
+        mesh: new THREE.Group(),
+        health: 100,
+        maxHealth: 100,
+        shield: 50,
+        maxShield: 100,
+        velocity: new THREE.Vector3(),
+        isGrounded: true,
+        weapon: {
+            type: 'AR',
+            rarity: RARITIES.COMMON,
+            lastFired: 0,
+            ammo: 30
+        },
+        inventory: [
+            { type: 'AR', rarity: RARITIES.COMMON },
+            null, null, null, null
+        ],
+        activeSlot: 0,
+        kills: 0
+    };
+
+    // FIX: Three.js r128 CapsuleGeometry check. Using Cylinder + Spheres as fallback if r128 doesn't have it natively
+    // Or just use CylinderGeometry as a robust placeholder for "Capsule" in older versions.
+    let bodyGeo;
+    try {
+        bodyGeo = new THREE.CylinderGeometry(0.5, 0.5, 1.5, 8);
+    } catch(e) {
+        bodyGeo = new THREE.BoxGeometry(1, 2, 1);
+    }
+
+    const body = new THREE.Mesh(bodyGeo, new THREE.MeshStandardMaterial({ color: 0x3498db }));
+    body.position.y = 1;
+    body.castShadow = true;
+    player.mesh.add(body);
+
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshStandardMaterial({ color: 0xecf0f1 }));
+    head.position.y = 1.8;
+    player.mesh.add(head);
+
+    // Gun Model
+    const gun = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.8), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+    gun.position.set(0.4, 1.2, 0.5);
+    player.mesh.add(gun);
+    player.gun = gun;
+
+    player.mesh.position.set(0, 0, 0);
+    scene.add(player.mesh);
+}
+
+/**
+ * ENTITIES (AI, VEHICLES, DROPS)
+ */
+function spawnInitialEntities() {
+    // Enemies
+    for(let i=0; i<15; i++) spawnEnemy();
+    
+    // Vehicles
+    for(let i=0; i<5; i++) spawnVehicle();
+}
+
+function spawnEnemy() {
+    const group = new THREE.Group();
+    // Use Cylinder instead of Capsule for compatibility
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 1.5, 8), new THREE.MeshStandardMaterial({ color: 0xe74c3c }));
+    body.position.y = 1;
+    group.add(body);
+    
+    group.position.set((Math.random()-0.5)*worldSize*0.8, 0, (Math.random()-0.5)*worldSize*0.8);
+    scene.add(group);
+    
+    entities.enemies.push({
+        mesh: group,
+        health: 50,
+        lastShot: 0,
+        state: 'IDLE',
+        targetPos: group.position.clone()
+    });
+}
+
+function spawnVehicle() {
+    const group = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(4, 1.5, 2.5), new THREE.MeshStandardMaterial({ color: 0xf39c12 }));
+    body.position.y = 1;
+    group.add(body);
+
+    // Wheels
+    const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 12);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+    [[1.5,-1], [1.5,1], [-1.5,-1], [-1.5,1]].forEach(pos => {
+        const w = new THREE.Mesh(wheelGeo, wheelMat);
+        w.rotation.x = Math.PI/2;
+        w.position.set(pos[0], 0.5, pos[1]);
+        group.add(w);
+    });
+
+    group.position.set((Math.random()-0.5)*worldSize*0.6, 0, (Math.random()-0.5)*worldSize*0.6);
+    scene.add(group);
+    entities.vehicles.push({
+        mesh: group,
+        speed: 0.1 + Math.random() * 0.1,
+        angle: Math.random() * Math.PI * 2
+    });
+}
+
+function spawnLoot(pos) {
+    const rarities = Object.values(RARITIES);
+    const rarity = rarities[Math.floor(Math.random() * rarities.length)];
+    
+    const geo = new THREE.IcosahedronGeometry(0.4);
+    const mat = new THREE.MeshStandardMaterial({ color: rarity.color, emissive: rarity.color, emissiveIntensity: 0.5 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(pos);
+    mesh.position.y = 0.5;
+    scene.add(mesh);
+    
+    entities.pickups.push({ mesh, rarity, type: 'WEAPON' });
+}
+
+/**
+ * BUILDING SYSTEM
+ */
+function placeBuild() {
+    const woodTex = textureLoader.load(TEXTURES.build);
+    const geo = new THREE.BoxGeometry(4, 0.2, 4);
+    const mat = new THREE.MeshStandardMaterial({ map: woodTex });
+    const build = new THREE.Mesh(geo, mat);
+    
+    // Position in front of player
+    const direction = new THREE.Vector3(0, 0, 1).applyQuaternion(player.mesh.quaternion);
+    build.position.copy(player.mesh.position).add(direction.multiplyScalar(4));
+    build.position.y = 0.1;
+    
+    scene.add(build);
+    entities.builds.push(build);
+}
+
+/**
+ * INPUT HANDLING
+ */
+function onMouseMove(e) {
+    if (document.pointerLockElement === renderer.domElement) {
+        player.mesh.rotation.y -= e.movementX * 0.002;
+    }
+}
+
+function onMouseDown(e) {
+    if (gameState !== 'PLAYING') return;
+    if (e.button === 0) fireWeapon();
+}
+
+function fireWeapon() {
+    const now = Date.now();
+    if (now - player.weapon.lastFired < player.weapon.rarity.fireRate) return;
+    
+    player.weapon.lastFired = now;
+    
+    const bulletGeo = new THREE.SphereGeometry(0.1);
+    const bulletMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+    const bullet = new THREE.Mesh(bulletGeo, bulletMat);
+    
+    const direction = new THREE.Vector3(0, 0, 1).applyQuaternion(player.mesh.quaternion);
+    bullet.position.copy(player.mesh.position).add(new THREE.Vector3(0, 1.2, 0)).add(direction.clone().multiplyScalar(1));
+    
+    scene.add(bullet);
+    entities.bullets.push({
+        mesh: bullet,
+        dir: direction,
+        owner: 'PLAYER',
+        life: 100
+    });
+}
+
+/**
+ * GAME LOOP & LOGIC
+ */
+function update(delta) {
+    if (gameState !== 'PLAYING') return;
+
+    // Movement
+    const moveSpeed = (keys['ShiftLeft'] ? 0.3 : 0.15);
+    const direction = new THREE.Vector3();
+    if (keys['KeyW']) direction.z += 1;
+    if (keys['KeyS']) direction.z -= 1;
+    if (keys['KeyA']) direction.x += 1;
+    if (keys['KeyD']) direction.x -= 1;
+    
+    direction.normalize().applyQuaternion(player.mesh.quaternion);
+    player.mesh.position.add(direction.multiplyScalar(moveSpeed));
+
+    // Jump
+    if (keys['Space'] && player.isGrounded) {
+        player.velocity.y = 0.2;
+        player.isGrounded = false;
+    }
+    
+    // Simple Gravity
+    if (!player.isGrounded) {
+        player.mesh.position.y += player.velocity.y;
+        player.velocity.y -= 0.01;
+        if (player.mesh.position.y <= 0) {
+            player.mesh.position.y = 0;
+            player.isGrounded = true;
+        }
+    }
+
+    // Build trigger
+    if (keys['KeyQ']) {
+        placeBuild();
+        keys['KeyQ'] = false; // Debounce
+    }
+
+    // Camera follow (Over the shoulder)
+    const camOffset = new THREE.Vector3(0, 2.5, -6).applyQuaternion(player.mesh.quaternion);
+    camera.position.copy(player.mesh.position).add(camOffset);
+    camera.lookAt(player.mesh.position.clone().add(new THREE.Vector3(0, 1.5, 0)));
+
+    updateEntities(delta);
+    updateUI();
+}
+
+function updateEntities(delta) {
+    // Bullets
+    for (let i = entities.bullets.length - 1; i >= 0; i--) {
+        const b = entities.bullets[i];
+        b.mesh.position.add(b.dir.clone().multiplyScalar(1.5));
+        b.life--;
+
+        // Collision Check
+        if (b.owner === 'PLAYER') {
+            entities.enemies.forEach(en => {
+                if (en.mesh.position.distanceTo(b.mesh.position) < 1.5) {
+                    en.health -= player.weapon.rarity.damage;
+                    b.life = 0;
+                }
+            });
+        } else {
+            if (player.mesh.position.distanceTo(b.mesh.position) < 1.5) {
+                damagePlayer(10);
+                b.life = 0;
+            }
+        }
+
+        if (b.life <= 0) {
+            scene.remove(b.mesh);
+            entities.bullets.splice(i, 1);
+        }
+    }
+
+    // Enemies
+    entities.enemies.forEach((en, idx) => {
+        const dist = en.mesh.position.distanceTo(player.mesh.position);
+        
+        if (dist < 40) { // Chase & Shoot
+            en.mesh.lookAt(player.mesh.position);
+            const moveDir = player.mesh.position.clone().sub(en.mesh.position).normalize();
+            if (dist > 10) en.mesh.position.add(moveDir.multiplyScalar(0.05));
+            
+            // Shoot
+            if (Date.now() - en.lastShot > 1500) {
+                en.lastShot = Date.now();
+                enemyFire(en);
+            }
+        }
+
+        if (en.health <= 0) {
+            spawnLoot(en.mesh.position.clone());
+            scene.remove(en.mesh);
+            entities.enemies.splice(idx, 1);
+            player.kills++;
+        }
+    });
+
+    // Vehicles
+    entities.vehicles.forEach(v => {
+        v.angle += 0.01;
+        v.mesh.position.x += Math.cos(v.angle) * v.speed;
+        v.mesh.position.z += Math.sin(v.angle) * v.speed;
+        v.mesh.rotation.y = -v.angle + Math.PI;
+
+        // Player crush
+        if (v.mesh.position.distanceTo(player.mesh.position) < 3) {
+            damagePlayer(1); // Grazing damage
+        }
+    });
+
+    // Pickups
+    entities.pickups.forEach((p, idx) => {
+        p.mesh.rotation.y += 0.05;
+        if (p.mesh.position.distanceTo(player.mesh.position) < 2) {
+            equipWeapon(p.rarity);
+            scene.remove(p.mesh);
+            entities.pickups.splice(idx, 1);
+        }
+    });
+}
+
+function enemyFire(en) {
+    const bulletGeo = new THREE.SphereGeometry(0.15);
+    const bulletMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const bullet = new THREE.Mesh(bulletGeo, bulletMat);
+    const direction = player.mesh.position.clone().sub(en.mesh.position).normalize();
+    bullet.position.copy(en.mesh.position).add(new THREE.Vector3(0,1,0));
+    scene.add(bullet);
+    entities.bullets.push({ mesh: bullet, dir: direction, owner: 'ENEMY', life: 100 });
+}
+
+function damagePlayer(amt) {
+    if (player.shield > 0) {
+        player.shield -= amt;
+        if (player.shield < 0) player.shield = 0;
+    } else {
+        player.health -= amt;
+    }
+    
+    if (player.health <= 0) gameOver();
+}
+
+function equipWeapon(rarity) {
+    player.weapon.rarity = rarity;
+    document.getElementById('weapon-rarity').innerText = rarity.name;
+    document.getElementById('weapon-rarity').style.color = rarity.color;
+    player.gun.material.color.set(rarity.color);
+}
+
+/**
+ * UI UPDATES
+ */
+function updateUI() {
+    document.getElementById('health-bar').style.width = `${player.health}%`;
+    document.getElementById('shield-bar').style.width = `${player.shield}%`;
+    
+    // Update Minimap
+    const map = document.getElementById('minimap');
+    map.innerHTML = '';
+    
+    // Player on map
+    createDot(0, 0, 'white');
+    
+    // Enemies on map
+    entities.enemies.forEach(en => {
+        const dx = (en.mesh.position.x - player.mesh.position.x) / 2;
+        const dz = (en.mesh.position.z - player.mesh.position.z) / 2;
+        if (Math.sqrt(dx*dx + dz*dz) < 70) createDot(dx, dz, 'red');
+    });
+
+    // Loot on map
+    entities.pickups.forEach(p => {
+        const dx = (p.mesh.position.x - player.mesh.position.x) / 2;
+        const dz = (p.mesh.position.z - player.mesh.position.z) / 2;
+        if (Math.sqrt(dx*dx + dz*dz) < 70) createDot(dx, dz, p.rarity.color);
+    });
+}
+
+function createDot(x, z, color) {
+    const dot = document.createElement('div');
+    dot.className = 'map-dot';
+    dot.style.background = color;
+    dot.style.left = `${75 + x}px`;
+    dot.style.top = `${75 - z}px`;
+    document.getElementById('minimap').appendChild(dot);
+}
+
+/**
+ * SCREEN HANDLERS
+ */
+function startGame() {
+    document.getElementById('start-screen').classList.add('hidden');
+    gameState = 'PLAYING';
+    stats.startTime = Date.now();
+    renderer.domElement.requestPointerLock();
+}
+
+function gameOver() {
+    gameState = 'OVER';
+    document.exitPointerLock();
+    document.getElementById('death-screen').classList.remove('hidden');
+    document.getElementById('stat-kills').innerText = player.kills;
+    document.getElementById('stat-time').innerText = Math.floor((Date.now() - stats.startTime) / 1000) + 's';
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+    update(delta);
+    renderer.render(scene, camera);
+}
+
+// Global Start
+window.onload = init;
+</script>
+</body>
+</html>

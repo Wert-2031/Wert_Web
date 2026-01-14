@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon">
+  <title>Wert-Web — Games</title>
+
+</head>
+<body>
+
+  <!-- Navbar Include -->
+  <div id="navbar"></div>
+
+  <script>
+    fetch("navbar.html")
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById("navbar").innerHTML = data;
+
+        // Load sounds
+        const hoverSound = new Audio("hover.wav");
+        const clickSound = new Audio("click.wav");
+
+        let interacted = false;
+        document.addEventListener("click", () => { interacted = true; }, { once: true });
+
+        const links = document.querySelectorAll(".navbar a");
+        links.forEach(link => {
+          link.addEventListener("mouseenter", () => {
+            if (interacted) { hoverSound.currentTime = 0; hoverSound.play(); }
+          });
+          link.addEventListener("click", () => { clickSound.currentTime = 0; clickSound.play(); });
+
+          const currentPage = window.location.pathname.split("/").pop();
+          if (link.getAttribute("href") === currentPage) { link.classList.add("active"); }
+        });
+      });
+  </script>
+    <ul>
+        <li><a href="ChatgptFPS.html">Chatgpt's 3D Battle Royale</a></li>
+        <li><a href="GeminiFPS.html">Gemini's 3D Battle Royale</a></li>
+    </ul>
+</body>
+</html>

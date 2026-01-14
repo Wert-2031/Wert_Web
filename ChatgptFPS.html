@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ChatGPT's 3D Battle Royale</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="Wert_2031.ico" type="image/x-icon">
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #000;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ================= UI SCREENS ================= */
+#startScreen, #gameOverScreen {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, #222, #000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.panel {
+    background: #111;
+    border: 2px solid #555;
+    padding: 30px 50px;
+    color: #fff;
+    text-align: center;
+}
+
+.panel h1 {
+    margin-bottom: 20px;
+}
+
+.panel button {
+    padding: 12px 28px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* ================= HUD ================= */
+#hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.bar {
+    position: absolute;
+    left: 20px;
+    width: 220px;
+    height: 18px;
+    background: #333;
+    border: 1px solid #000;
+}
+
+#healthBar { bottom: 80px; }
+#shieldBar { bottom: 55px; }
+
+.fill {
+    height: 100%;
+}
+
+#healthFill { background: #c0392b; }
+#shieldFill { background: #2980b9; }
+
+#weaponInfo {
+    position: absolute;
+    right: 20px;
+    bottom: 60px;
+    color: #fff;
+    text-align: right;
+}
+
+/* ================= HOTBAR ================= */
+#hotbar {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+}
+
+.slot {
+    width: 52px;
+    height: 52px;
+    background: #222;
+    border: 2px solid #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 11px;
+}
+
+.slot.active {
+    border-color: #fff;
+}
+
+/* ================= MINIMAP ================= */
+#minimap {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 160px;
+    height: 160px;
+    background: rgba(0,0,0,0.6);
+    border: 2px solid #555;
+}
+</style>
+</head>
+<body>
+      
+    <!-- Navbar Include -->
+  <div id="navbar"></div>
+
+  <script>
+    fetch("navbar.html")
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById("navbar").innerHTML = data;
+
+        // Load sounds
+        const hoverSound = new Audio("hover.wav");
+        const clickSound = new Audio("click.wav");
+
+        let interacted = false;
+        document.addEventListener("click", () => { interacted = true; }, { once: true });
+
+        const links = document.querySelectorAll(".navbar a");
+        links.forEach(link => {
+          link.addEventListener("mouseenter", () => {
+            if (interacted) { hoverSound.currentTime = 0; hoverSound.play(); }
+          });
+          link.addEventListener("click", () => { clickSound.currentTime = 0; clickSound.play(); });
+
+          const currentPage = window.location.pathname.split("/").pop();
+          if (link.getAttribute("href") === currentPage) { link.classList.add("active"); }
+        });
+      });
+  </script>
+
+<div id="startScreen">
+    <div class="panel">
+        <h1>3D Shooter</h1>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+</div>
+
+<div id="gameOverScreen" style="display:none;">
+    <div class="panel">
+        <h1>Game Over</h1>
+        <p id="stats"></p>
+        <button onclick="restartGame()">Restart</button>
+    </div>
+</div>
+
+<div id="hud">
+    <div class="bar" id="healthBar"><div class="fill" id="healthFill"></div></div>
+    <div class="bar" id="shieldBar"><div class="fill" id="shieldFill"></div></div>
+    <div id="weaponInfo"></div>
+    <div id="hotbar"></div>
+    <canvas id="minimap"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
+let scene, camera, renderer, clock;
+let player, playerVelocity = new THREE.Vector3();
+let keys = {};
+let bullets = [];
+let enemies = [];
+let vehicles = [];
+let loot = [];
+let startTime = 0;
+let kills = 0;
+let gameRunning = false;
+
+/* =========================================================
+   TEXTURE PATHS (SWAPPABLE)
+========================================================= */
+const TEXTURES = {
+    ground: "textures/grass.png",
+    wood: "textures/wood.png"
+};
+
+/* =========================================================
+   WEAPONS & RARITY
+========================================================= */
+const RARITY = [
+    { name: "Common", color: "#aaa", dmg: 1, rate: 0.6 },
+    { name: "Uncommon", color: "#2ecc71", dmg: 1.2, rate: 0.55 },
+    { name: "Rare", color: "#3498db", dmg: 1.5, rate: 0.5 },
+    { name: "Epic", color: "#9b59b6", dmg: 2, rate: 0.45 },
+    { name: "Legendary", color: "#f1c40f", dmg: 3, rate: 0.4 }
+];
+
+const WEAPONS = [
+    { name: "Pistol", baseDamage: 10 },
+    { name: "Shotgun", baseDamage: 18 },
+    { name: "Rifle", baseDamage: 8 }
+];
+
+let inventory = [];
+let activeWeapon = 0;
+let lastShot = 0;
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+function startGame() {
+    document.getElementById("startScreen").style.display = "none";
+    init();
+    gameRunning = true;
+    startTime = performance.now();
+    animate();
+}
+
+function restartGame() {
+    location.reload();
+}
+
+function init() {
+    clock = new THREE.Clock();
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87ceeb);
+
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    renderer = new THREE.WebGLRenderer({ antialias: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    /* ---------- LIGHTING ---------- */
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+    sun.position.set(50, 80, 20);
+    sun.castShadow = true;
+    scene.add(sun);
+
+    /* ---------- GROUND ---------- */
+    const loader = new THREE.TextureLoader();
+    const groundTex = loader.load(TEXTURES.ground, undefined, undefined, () => {});
+    groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
+    groundTex.repeat.set(40, 40);
+
+    const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(500, 500),
+        new THREE.MeshStandardMaterial({ map: groundTex, color: 0x228b22 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    /* ---------- PLAYER ---------- */
+    player = new THREE.Mesh(
+        new THREE.CapsuleGeometry(0.5, 1.2, 4, 8),
+        new THREE.MeshStandardMaterial({ color: 0xffffff })
+    );
+    player.position.set(0, 2, 0);
+    player.castShadow = true;
+    player.health = 100;
+    player.shield = 50;
+    scene.add(player);
+
+    camera.position.set(0, 4, -6);
+
+    /* ---------- BUILDINGS ---------- */
+    for (let i = 0; i < 20; i++) {
+        const b = new THREE.Mesh(
+            new THREE.BoxGeometry(4, 4, 4),
+            new THREE.MeshStandardMaterial({ color: 0xdeb887 })
+        );
+        b.position.set(
+            (Math.random() - 0.5) * 200,
+            2,
+            (Math.random() - 0.5) * 200
+        );
+        b.castShadow = true;
+        b.receiveShadow = true;
+        scene.add(b);
+    }
+
+    /* ---------- ENEMIES ---------- */
+    for (let i = 0; i < 10; i++) spawnEnemy();
+
+    /* ---------- VEHICLES ---------- */
+    for (let i = 0; i < 3; i++) spawnVehicle();
+
+    /* ---------- INVENTORY ---------- */
+    for (let i = 0; i < 3; i++) {
+        const r = RARITY[Math.floor(Math.random() * RARITY.length)];
+        inventory.push({
+            weapon: WEAPONS[i],
+            rarity: r
+        });
+    }
+    buildHotbar();
+
+    /* ---------- INPUT ---------- */
+    window.addEventListener("keydown", e => keys[e.code] = true);
+    window.addEventListener("keyup", e => keys[e.code] = false);
+    window.addEventListener("mousedown", shoot);
+    window.addEventListener("mousemove", mouseLook);
+    window.addEventListener("resize", onResize);
+}
+
+/* =========================================================
+   GAME LOOP
+========================================================= */
+function animate() {
+    if (!gameRunning) return;
+    requestAnimationFrame(animate);
+    const dt = clock.getDelta();
+    updatePlayer(dt);
+    updateBullets(dt);
+    updateEnemies(dt);
+    updateVehicles(dt);
+    updateCamera();
+    updateHUD();
+    updateMinimap();
+    renderer.render(scene, camera);
+}
+
+/* =========================================================
+   PLAYER
+========================================================= */
+function updatePlayer(dt) {
+    const speed = keys["ShiftLeft"] ? 10 : 6;
+    const dir = new THREE.Vector3();
+
+    if (keys["KeyW"]) dir.z -= 1;
+    if (keys["KeyS"]) dir.z += 1;
+    if (keys["KeyA"]) dir.x -= 1;
+    if (keys["KeyD"]) dir.x += 1;
+
+    dir.normalize().applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
+    player.position.addScaledVector(dir, speed * dt);
+
+    if (keys["Space"] && player.position.y <= 2) {
+        playerVelocity.y = 6;
+    }
+    playerVelocity.y -= 12 * dt;
+    player.position.y += playerVelocity.y * dt;
+    if (player.position.y < 2) {
+        player.position.y = 2;
+        playerVelocity.y = 0;
+    }
+
+    for (let i = 0; i < inventory.length; i++) {
+        if (keys["Digit" + (i + 1)]) activeWeapon = i;
+    }
+}
+
+function mouseLook(e) {
+    if (!gameRunning) return;
+    player.rotation.y -= e.movementX * 0.002;
+}
+
+/* =========================================================
+   SHOOTING
+========================================================= */
+function shoot() {
+    const weapon = inventory[activeWeapon];
+    if (!weapon) return;
+    const time = performance.now() / 1000;
+    if (time - lastShot < weapon.rarity.rate) return;
+    lastShot = time;
+
+    const bullet = new THREE.Mesh(
+        new THREE.SphereGeometry(0.1),
+        new THREE.MeshBasicMaterial({ color: weapon.rarity.color })
+    );
+    bullet.position.copy(player.position);
+    bullet.velocity = new THREE.Vector3(0, 0, -1)
+        .applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y)
+        .multiplyScalar(30);
+    bullet.damage = weapon.weapon.baseDamage * weapon.rarity.dmg;
+    scene.add(bullet);
+    bullets.push(bullet);
+}
+
+/* =========================================================
+   BULLETS
+========================================================= */
+function updateBullets(dt) {
+    bullets = bullets.filter(b => {
+        b.position.addScaledVector(b.velocity, dt);
+        for (const e of enemies) {
+            if (b.position.distanceTo(e.position) < 1) {
+                e.health -= b.damage;
+                scene.remove(b);
+                return false;
+            }
+        }
+        if (b.position.length() > 500) {
+            scene.remove(b);
+            return false;
+        }
+        return true;
+    });
+}
+
+/* =========================================================
+   ENEMIES
+========================================================= */
+function spawnEnemy() {
+    const e = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 2, 1),
+        new THREE.MeshStandardMaterial({ color: 0xff0000 })
+    );
+    e.position.set((Math.random()-0.5)*200, 2, (Math.random()-0.5)*200);
+    e.health = 40;
+    scene.add(e);
+    enemies.push(e);
+}
+
+function updateEnemies(dt) {
+    enemies = enemies.filter(e => {
+        const d = player.position.clone().sub(e.position);
+        const dist = d.length();
+        if (dist < 40) {
+            d.normalize();
+            e.position.addScaledVector(d, 2 * dt);
+        }
+        if (dist < 1.5) {
+            player.health -= 20 * dt;
+        }
+        if (e.health <= 0) {
+            spawnLoot(e.position);
+            scene.remove(e);
+            kills++;
+            return false;
+        }
+        return true;
+    });
+
+    if (player.health <= 0) gameOver();
+}
+
+/* =========================================================
+   VEHICLES
+========================================================= */
+function spawnVehicle() {
+    const v = new THREE.Group();
+    const body = new THREE.Mesh(
+        new THREE.BoxGeometry(3,1,5),
+        new THREE.MeshStandardMaterial({ color: 0x555555 })
+    );
+    body.castShadow = true;
+    v.add(body);
+    v.position.set((Math.random()-0.5)*200,1,(Math.random()-0.5)*200);
+    v.dir = Math.random() * Math.PI * 2;
+    scene.add(v);
+    vehicles.push(v);
+}
+
+function updateVehicles(dt) {
+    vehicles.forEach(v => {
+        v.position.x += Math.cos(v.dir) * dt * 6;
+        v.position.z += Math.sin(v.dir) * dt * 6;
+        if (v.position.distanceTo(player.position) < 2) {
+            player.health -= 30 * dt;
+        }
+    });
+}
+
+/* =========================================================
+   LOOT
+========================================================= */
+function spawnLoot(pos) {
+    const l = new THREE.Mesh(
+        new THREE.BoxGeometry(0.6,0.6,0.6),
+        new THREE.MeshStandardMaterial({ color: 0x00ff00 })
+    );
+    l.position.copy(pos);
+    scene.add(l);
+    loot.push(l);
+}
+
+/* =========================================================
+   CAMERA
+========================================================= */
+function updateCamera() {
+    const offset = new THREE.Vector3(0, 4, 6)
+        .applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
+    camera.position.copy(player.position).add(offset);
+    camera.lookAt(player.position);
+}
+
+/* =========================================================
+   HUD & MINIMAP
+========================================================= */
+function updateHUD() {
+    document.getElementById("healthFill").style.width = Math.max(player.health,0) + "%";
+    document.getElementById("shieldFill").style.width = player.shield + "%";
+
+    const w = inventory[activeWeapon];
+    if (w) {
+        document.getElementById("weaponInfo").innerHTML =
+            `<span style="color:${w.rarity.color}">${w.weapon.name} (${w.rarity.name})</span>`;
+    }
+
+    [...document.querySelectorAll(".slot")].forEach((s,i)=>{
+        s.classList.toggle("active", i === activeWeapon);
+    });
+}
+
+function buildHotbar() {
+    const bar = document.getElementById("hotbar");
+    bar.innerHTML = "";
+    inventory.forEach((w,i)=>{
+        const d = document.createElement("div");
+        d.className = "slot";
+        d.style.borderColor = w.rarity.color;
+        d.textContent = i+1;
+        bar.appendChild(d);
+    });
+}
+
+function updateMinimap() {
+    const c = document.getElementById("minimap");
+    const ctx = c.getContext("2d");
+    ctx.clearRect(0,0,c.width,c.height);
+    const scale = 0.3;
+
+    function drawDot(x,z,color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(
+            c.width/2 + x*scale,
+            c.height/2 + z*scale,
+            4,4
+        );
+    }
+
+    drawDot(player.position.x, player.position.z, "#fff");
+    enemies.forEach(e=>drawDot(e.position.x,e.position.z,"red"));
+    vehicles.forEach(v=>drawDot(v.position.x,v.position.z,"yellow"));
+    loot.forEach(l=>drawDot(l.position.x,l.position.z,"lime"));
+}
+
+/* =========================================================
+   GAME OVER
+========================================================= */
+function gameOver() {
+    gameRunning = false;
+    document.getElementById("gameOverScreen").style.display = "flex";
+    const time = ((performance.now()-startTime)/1000).toFixed(1);
+    document.getElementById("stats").innerText =
+        `Enemies Eliminated: ${kills}\nTime Survived: ${time}s`;
+}
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+</script>
+</body>
+</html>
